@@ -22,7 +22,7 @@ export default function AddAmenity() {
         formData
       );
 
-      Swal.fire({
+      await Swal.fire({
         icon: "success",
         title:
           response.message ||

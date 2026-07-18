@@ -23,3 +23,12 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# Uploads (if any temporary files are created)
+backend/uploads/
+
+# Coverage (if you add tests later)
+coverage/
+
+# Optional cache files
+*.tsbuildinfo

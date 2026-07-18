@@ -14,6 +14,7 @@ import {
 } from "../../../services/galleryService";
 
 import type { Gallery } from "../../../types/gallery";
+import axios from "axios";
 
 export default function EditGallery() {
   const { id } = useParams();
@@ -29,10 +30,6 @@ export default function EditGallery() {
   const [pageLoading, setPageLoading] =
     useState(true);
 
-  useEffect(() => {
-    loadGallery();
-  }, []);
-
   const loadGallery = async () => {
     try {
       setPageLoading(true);
@@ -46,7 +43,7 @@ export default function EditGallery() {
     } catch {
       Swal.fire({
         icon: "error",
-        title: "Failed to load gallery image",
+        title: "Failed to load gallery media",
       });
 
       navigate("/admin/gallery");
@@ -54,38 +51,51 @@ export default function EditGallery() {
       setPageLoading(false);
     }
   };
+ useEffect(() => {
+  if (id) {
+    loadGallery();
+  }
+}, [id]);
 
   const handleSubmit = async (
-    formData: FormData
-  ) => {
-    try {
-      setLoading(true);
+  formData: FormData
+) => {
+  try {
+    setLoading(true);
 
-      const response =
-        await updateGallery(
-          id!,
-          formData
-        );
+    const response = await updateGallery(
+      id!,
+      formData
+    );
 
-      if (response.success) {
-        await Swal.fire({
-          icon: "success",
-          title: "Gallery updated successfully",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-
-        navigate("/admin/gallery");
-      }
-    } catch {
-      Swal.fire({
-        icon: "error",
-        title: "Update failed",
+    if (response.success) {
+      await Swal.fire({
+        icon: "success",
+        title: "Gallery updated successfully",
+        timer: 1500,
+        showConfirmButton: false,
       });
-    } finally {
-      setLoading(false);
+
+      navigate("/admin/gallery");
     }
-  };
+  } catch (error) {
+    let message = "Update failed.";
+
+    if (axios.isAxiosError(error)) {
+      message =
+        error.response?.data?.message ||
+        error.message;
+    }
+
+    Swal.fire({
+      icon: "error",
+      title: "Update Failed",
+      text: message,
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (pageLoading) {
     return (
@@ -101,22 +111,22 @@ export default function EditGallery() {
 
   return (
     <AdminLayout>
-      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow p-8">
+  <div className="max-w-4xl mx-auto bg-white rounded-xl shadow p-8">
 
-        <h1 className="text-3xl font-bold mb-8">
-          Edit Gallery Image
-        </h1>
+    <h1 className="text-3xl font-bold mb-8">
+      Edit Gallery Media
+    </h1>
 
-        {gallery && (
-          <GalleryForm
-            initialData={gallery}
-            onSubmit={handleSubmit}
-            loading={loading}
-            submitText="Update Gallery"
-          />
-        )}
+    {gallery && (
+      <GalleryForm
+        initialData={gallery}
+        onSubmit={handleSubmit}
+        loading={loading}
+        submitText="Update Gallery"
+      />
+    )}
 
-      </div>
-    </AdminLayout>
+  </div>
+</AdminLayout>
   );
 }

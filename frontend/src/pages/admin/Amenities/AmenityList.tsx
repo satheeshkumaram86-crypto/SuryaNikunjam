@@ -28,32 +28,40 @@ export default function AmenityList() {
   }, []);
 
   const loadAmenities = async () => {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const response = await getAmenities();
+    const response = await getAmenities();
 
-      if (response.success) {
-        setAmenities(response.amenities);
-      }
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Failed to load amenities",
-      });
-    } finally {
-      setLoading(false);
+    if (response.success) {
+      setAmenities(response.amenities || []);
     }
-  };
+  } catch (error: any) {
+    Swal.fire({
+      icon: "error",
+      title:
+        error?.response?.data?.message ||
+        "Failed to load amenities",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   const filteredAmenities = useMemo(() => {
-    return amenities.filter((amenity) =>
-      amenity.title
-        .toLowerCase()
-        .includes(search.toLowerCase())
-    );
-  }, [amenities, search]);
+  const keyword = search.toLowerCase().trim();
 
+  return amenities.filter(
+    (amenity) =>
+      (amenity.title || "")
+        .toLowerCase()
+        .includes(keyword) ||
+      (amenity.description || "")
+        .toLowerCase()
+        .includes(keyword)
+  );
+}, [amenities, search]);
+const hasData = filteredAmenities.length > 0;
   const totalPages = Math.ceil(
     filteredAmenities.length / itemsPerPage
   );
@@ -64,48 +72,85 @@ export default function AmenityList() {
   );
 
   const handleDelete = async (id: string) => {
-    const result = await Swal.fire({
-      title: "Delete Amenity?",
-      text: "This action cannot be undone.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      confirmButtonText: "Delete",
+  const result = await Swal.fire({
+    title: "Delete Amenity?",
+    text: "This action cannot be undone.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    confirmButtonText: "Delete",
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    await deleteAmenity(id);
+
+    await Swal.fire({
+      icon: "success",
+      title: "Amenity Deleted Successfully",
+      timer: 1200,
+      showConfirmButton: false,
     });
 
-    if (!result.isConfirmed) return;
+    const response = await getAmenities();
 
-    try {
-      await deleteAmenity(id);
+    if (response.success) {
+      const updatedAmenities =
+        response.amenities || [];
 
-      Swal.fire({
-        icon: "success",
-        title: "Deleted Successfully",
-        timer: 1200,
-        showConfirmButton: false,
-      });
+      setAmenities(updatedAmenities);
 
-      loadAmenities();
-    } catch {
-      Swal.fire({
-        icon: "error",
-        title: "Delete failed",
-      });
+      const keyword = search
+        .toLowerCase()
+        .trim();
+
+      const filtered =
+        updatedAmenities.filter(
+          (item: Amenity) =>
+            (item.title || "")
+              .toLowerCase()
+              .includes(keyword) ||
+            (item.description || "")
+              .toLowerCase()
+              .includes(keyword)
+        );
+
+      const newTotalPages = Math.max(
+        1,
+        Math.ceil(
+          filtered.length / itemsPerPage
+        )
+      );
+
+      if (currentPage > newTotalPages) {
+        setCurrentPage(newTotalPages);
+      }
     }
-  };
+  } catch (error: any) {
+    Swal.fire({
+      icon: "error",
+      title:
+        error?.response?.data?.message ||
+        "Delete failed",
+    });
+  }
+};
 
   const handleToggle = async (id: string) => {
-    try {
-      await toggleAmenityStatus(id);
+  try {
+    await toggleAmenityStatus(id);
 
-      loadAmenities();
-    } catch {
-      Swal.fire({
-        icon: "error",
-        title: "Status update failed",
-      });
-    }
-  };
+    loadAmenities();
+  } catch (error: any) {
+    Swal.fire({
+      icon: "error",
+      title:
+        error?.response?.data?.message ||
+        "Status update failed",
+    });
+  }
+};
 
   if (loading) {
     return (
@@ -163,11 +208,23 @@ export default function AmenityList() {
 
         {/* Table */}
 
-        <AmenityTable
-          amenities={paginatedAmenities}
-          onDelete={handleDelete}
-          onToggle={handleToggle}
-        />
+        {hasData ? (
+  <AmenityTable
+    amenities={paginatedAmenities}
+    onDelete={handleDelete}
+    onToggle={handleToggle}
+  />
+) : (
+  <div className="bg-white rounded-xl shadow p-12 text-center">
+    <h3 className="text-xl font-semibold text-gray-700">
+      No amenities found
+    </h3>
+
+    <p className="text-gray-500 mt-2">
+      Try changing your search or add a new amenity.
+    </p>
+  </div>
+)}
 
         {/* Pagination */}
 

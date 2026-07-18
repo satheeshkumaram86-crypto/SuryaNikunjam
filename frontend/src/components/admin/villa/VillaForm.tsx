@@ -43,11 +43,9 @@ export default function VillaForm({
         isActive: initialData.isActive,
       });
 
-      setPreview(
-        initialData.image
-          ? `http://localhost:5000${initialData.image}`
-          : ""
-      );
+      if (initialData.image) {
+    setPreview(initialData.image);
+  }
     }
   }, [initialData]);
 
@@ -148,11 +146,12 @@ export default function VillaForm({
       <div className="grid md:grid-cols-2 gap-5">
         <div>
           <label className="block mb-2 font-medium">
-            Plot Size
+            Plot Size*
           </label>
 
           <input
             type="text"
+            required
             name="plotSize"
             value={form.plotSize}
             onChange={changeHandler}
@@ -163,11 +162,12 @@ export default function VillaForm({
 
         <div>
           <label className="block mb-2 font-medium">
-            Built-up Area
+            Built-up Area*
           </label>
 
           <input
             type="text"
+            required
             name="builtUpArea"
             value={form.builtUpArea}
             onChange={changeHandler}
@@ -217,10 +217,11 @@ export default function VillaForm({
 
       <div>
         <label className="block mb-2 font-medium">
-          Description
+          Description*
         </label>
 
         <textarea
+        required
           rows={5}
           maxLength={1000}
           name="description"

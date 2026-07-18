@@ -136,7 +136,7 @@ export default function ContactSettings() {
 
           <div>
             <label className="block mb-2 font-medium">
-              Company Name *
+              Contact Name *
             </label>
 
             <input
@@ -236,7 +236,7 @@ export default function ContactSettings() {
 
           <div>
             <label className="block mb-2 font-medium">
-              Google Map URL
+              Google Map Embed URL
             </label>
 
             <input

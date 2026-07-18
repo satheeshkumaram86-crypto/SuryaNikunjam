@@ -36,10 +36,12 @@ export default function GalleryList() {
       if (response.success) {
         setGallery(response.gallery || []);
       }
-    } catch {
+    } catch (error: any) {
       Swal.fire({
         icon: "error",
-        title: "Failed to load gallery",
+        title:
+          error?.response?.data?.message ||
+          "Failed to load gallery",
       });
     } finally {
       setLoading(false);
@@ -47,18 +49,20 @@ export default function GalleryList() {
   };
 
   const filteredGallery = useMemo(() => {
-    return gallery.filter((item) => {
-      const keyword = search.toLowerCase();
+    const keyword = search.toLowerCase().trim();
 
-      return (
-        item.title
+    return gallery.filter(
+      (item) =>
+        (item.title || "")
           .toLowerCase()
           .includes(keyword) ||
-        item.category
+        (item.category || "")
+          .toLowerCase()
+          .includes(keyword) ||
+        (item.mediaType || "")
           .toLowerCase()
           .includes(keyword)
-      );
-    });
+    );
   }, [gallery, search]);
 
   const totalPages = Math.ceil(
@@ -70,9 +74,11 @@ export default function GalleryList() {
     currentPage * itemsPerPage
   );
 
+  const hasData = filteredGallery.length > 0;
+
   const handleDelete = async (id: string) => {
     const result = await Swal.fire({
-      title: "Delete Image?",
+      title: "Delete Media?",
       text: "This action cannot be undone.",
       icon: "warning",
       showCancelButton: true,
@@ -85,18 +91,46 @@ export default function GalleryList() {
     try {
       await deleteGallery(id);
 
-      Swal.fire({
+      await Swal.fire({
         icon: "success",
-        title: "Deleted Successfully",
+        title: "Media Deleted Successfully",
         timer: 1200,
         showConfirmButton: false,
       });
 
-      loadGallery();
-    } catch {
+      await loadGallery();
+
+      const keyword = search.toLowerCase().trim();
+
+      const updatedFiltered = gallery.filter(
+        (item) =>
+          (item.title || "")
+            .toLowerCase()
+            .includes(keyword) ||
+          (item.category || "")
+            .toLowerCase()
+            .includes(keyword) ||
+          (item.mediaType || "")
+            .toLowerCase()
+            .includes(keyword)
+      );
+
+      const newTotalPages = Math.max(
+        1,
+        Math.ceil(
+          updatedFiltered.length / itemsPerPage
+        )
+      );
+
+      setCurrentPage((prev) =>
+        Math.min(prev, newTotalPages)
+      );
+    } catch (error: any) {
       Swal.fire({
         icon: "error",
-        title: "Delete failed",
+        title:
+          error?.response?.data?.message ||
+          "Failed to delete media",
       });
     }
   };
@@ -105,11 +139,13 @@ export default function GalleryList() {
     try {
       await toggleGalleryStatus(id);
 
-      loadGallery();
-    } catch {
+      await loadGallery();
+    } catch (error: any) {
       Swal.fire({
         icon: "error",
-        title: "Status update failed",
+        title:
+          error?.response?.data?.message ||
+          "Status update failed",
       });
     }
   };
@@ -119,7 +155,7 @@ export default function GalleryList() {
       <AdminLayout>
         <div className="flex justify-center items-center h-96">
           <p className="text-lg text-gray-500">
-            Loading Gallery...
+            Loading Gallery Media...
           </p>
         </div>
       </AdminLayout>
@@ -131,16 +167,16 @@ export default function GalleryList() {
       <div className="space-y-6">
 
         {/* Header */}
-
         <div className="flex justify-between items-center">
-
           <div>
-            <h1 className="text-3xl font-bold">
+            <h1 className="text-3xl font-bold text-gray-800">
               Gallery Management
             </h1>
 
-            <p className="text-gray-500">
-              Manage gallery images
+            <p className="text-gray-500 mt-1">
+              Upload and manage images,
+              uploaded videos, and YouTube
+              videos.
             </p>
           </div>
 
@@ -148,16 +184,14 @@ export default function GalleryList() {
             to="/admin/gallery/add"
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"
           >
-            + Add Image
+            + Add Media
           </Link>
-
         </div>
 
         {/* Search */}
-
         <input
           type="text"
-          placeholder="Search by title or category..."
+          placeholder="Search by title, category or media type..."
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
@@ -167,18 +201,29 @@ export default function GalleryList() {
         />
 
         {/* Table */}
+        {hasData ? (
+          <GalleryTable
+            gallery={paginatedGallery}
+            onDelete={handleDelete}
+            onToggle={handleToggle}
+          />
+        ) : (
+          <div className="bg-white rounded-xl shadow p-12 text-center">
+            <h3 className="text-xl font-semibold text-gray-700">
+              No gallery media found
+            </h3>
 
-        <GalleryTable
-          gallery={paginatedGallery}
-          onDelete={handleDelete}
-          onToggle={handleToggle}
-        />
+            <p className="text-gray-500 mt-2">
+              Try changing your search or add
+              a new image, uploaded video, or
+              YouTube video.
+            </p>
+          </div>
+        )}
 
         {/* Pagination */}
-
         {totalPages > 1 && (
           <div className="flex justify-center gap-2">
-
             {Array.from(
               { length: totalPages },
               (_, index) => (
@@ -188,7 +233,8 @@ export default function GalleryList() {
                     setCurrentPage(index + 1)
                   }
                   className={`px-4 py-2 rounded ${
-                    currentPage === index + 1
+                    currentPage ===
+                    index + 1
                       ? "bg-blue-600 text-white"
                       : "bg-gray-200 hover:bg-gray-300"
                   }`}
@@ -197,10 +243,8 @@ export default function GalleryList() {
                 </button>
               )
             )}
-
           </div>
         )}
-
       </div>
     </AdminLayout>
   );

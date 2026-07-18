@@ -35,7 +35,7 @@ const eventSchema = new Schema(
 
     image: {
       type: String,
-      required: true,
+      default:"",
     },
 
     eventDate: {

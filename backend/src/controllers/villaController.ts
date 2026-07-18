@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Villa from "../models/Villa";
+import cloudinary from "../config/cloudinary";
 
 // Get All
 export const getVillas = async (
@@ -75,7 +76,17 @@ export const createVilla = async (
         message: "Villa image is required.",
       });
     }
+    let image = "";
 
+if (req.file) {
+  const file = req.file as Express.Multer.File;
+
+  const result = await cloudinary.uploader.upload(file.path, {
+    folder: "surya-nikunjam/villas",
+  });
+
+  image = result.secure_url;
+}
     const villa = await Villa.create({
       title,
       plotSize,
@@ -85,9 +96,7 @@ export const createVilla = async (
       description,
       order,
       isActive,
-      image:
-        "/uploads/villas/" +
-        req.file.filename,
+      image
     });
 
     res.status(201).json({
@@ -134,10 +143,30 @@ export const updateVilla = async (
     villa.isActive = req.body.isActive;
 
     if (req.file) {
-      villa.image =
-        "/uploads/villas/" +
-        req.file.filename;
+
+  if (villa.image) {
+    try {
+      const parts = villa.image.split("/");
+      const filename = parts[parts.length - 1];
+
+      const publicId =
+        "surya-nikunjam/villas/" +
+        filename.split(".")[0];
+
+      await cloudinary.uploader.destroy(publicId);
+    } catch (err) {
+      console.log("Old image delete failed");
     }
+  }
+
+  const file = req.file as Express.Multer.File;
+
+  const result = await cloudinary.uploader.upload(file.path, {
+    folder: "surya-nikunjam/villas",
+  });
+
+  villa.image = result.secure_url;
+}
 
     await villa.save();
 
@@ -162,20 +191,52 @@ export const deleteVilla = async (
   res: Response
 ) => {
   try {
-    await Villa.findByIdAndDelete(
+    const villa = await Villa.findById(
       req.params.id
     );
 
-    res.json({
+    if (!villa) {
+      return res.status(404).json({
+        success: false,
+        message: "Villa not found.",
+      });
+    }
+
+    // Delete image from Cloudinary
+    if (villa.image) {
+      try {
+        const parts = villa.image.split("/");
+        const filename =
+          parts[parts.length - 1];
+
+        const publicId =
+          "surya-nikunjam/villas/" +
+          filename.split(".")[0];
+
+        await cloudinary.uploader.destroy(
+          publicId
+        );
+      } catch (err) {
+        console.log(
+          "Cloudinary delete failed"
+        );
+      }
+    }
+
+    await villa.deleteOne();
+
+    res.status(200).json({
       success: true,
       message:
         "Villa deleted successfully.",
     });
-  } catch {
+  } catch (error: any) {
+    console.error(error);
+
     res.status(500).json({
       success: false,
       message:
-        "Delete failed.",
+        "Failed to delete villa.",
     });
   }
 };

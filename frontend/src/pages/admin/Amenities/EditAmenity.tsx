@@ -43,14 +43,16 @@ export default function EditAmenity() {
       if (response.success) {
         setAmenity(response.amenity);
       }
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Failed to load amenity",
-      });
+    } catch (error: any) {
+  Swal.fire({
+    icon: "error",
+    title:
+      error?.response?.data?.message ||
+      "Failed to load amenity",
+  });
 
-      navigate("/admin/amenities");
-    } finally {
+  navigate("/admin/amenities");
+} finally {
       setPageLoading(false);
     }
   };
@@ -66,7 +68,7 @@ export default function EditAmenity() {
       const response =
         await updateAmenity(id, formData);
 
-      Swal.fire({
+      await Swal.fire({
         icon: "success",
         title:
           response.message ||

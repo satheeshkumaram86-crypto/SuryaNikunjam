@@ -5,14 +5,20 @@ import EventCard from "./EventCard";
 import { getEvents } from "../../../services/eventService";
 
 import type { Event } from "../../../types/event";
+import { Link } from "react-router-dom";
 
-export default function EventSection() {
+interface EventSectionProps {
+  limit?: number;
+  showViewAll?: boolean;
+}
+
+export default function EventSection({
+  limit,
+  showViewAll = false,
+}: EventSectionProps) {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadEvents();
-  }, []);
 
   const loadEvents = async () => {
     try {
@@ -35,7 +41,11 @@ export default function EventSection() {
               a.order - b.order
           );
 
-        setEvents(eventList);
+        setEvents(
+  limit
+    ? eventList.slice(0, limit)
+    : eventList
+);
       }
     } catch (error) {
       console.error(
@@ -46,6 +56,10 @@ export default function EventSection() {
       setLoading(false);
     }
   };
+
+   useEffect(() => {
+  loadEvents();
+}, [limit]);
 
   if (loading) {
     return (
@@ -110,7 +124,16 @@ export default function EventSection() {
         )}
 
       </div>
-
+{showViewAll && events.length > 0 && (
+  <div className="mt-10 text-center">
+    <Link
+      to="/events"
+      className="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition"
+    >
+      View All Events
+    </Link>
+  </div>
+)}
     </section>
   );
 }

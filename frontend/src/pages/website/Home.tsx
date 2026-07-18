@@ -45,19 +45,22 @@ export default function Home() {
       <WelcomeSection data={about} />
 
        {/* WHY CHOOSE */}
-      <WhyChooseSection />
+      <WhyChooseSection limit={3} />
 
        {/* VILLAS */}
-      <VillaSection />
+      <VillaSection
+  limit={3}
+  showViewAll
+/>
       
       {/* AMENITIES */}
-      <AmenitySection />
+      <AmenitySection  limit={3} showViewAll/>
 
       {/* LOCATION ADVANTAGES */}
       <LocationAdvantagesSection />
 
       {/* LIFESTYLE */}
-      <LifestyleSection  />
+      <LifestyleSection limit={3} showViewAll/>
 
       {/* MISSION & VISION */}
       <MissionVisionSection data={about} />
@@ -66,16 +69,25 @@ export default function Home() {
       {/*<AboutSection />*/}
 
       {/* GALLERY */}
-      <GallerySection />
-
+      <GallerySection limit={3} showViewAll/>
+      
       {/* EVENTS */}
-      <EventSection />
+      <EventSection
+  limit={3}
+  showViewAll
+/>
 
       {/* TESTIMONIALS */}
-      <TestimonialSection />
+      <TestimonialSection
+  limit={3}
+  showViewAll
+/>
 
       {/* FAQ */}
-      <FAQSection />
+      <FAQSection
+  limit={5}
+  showViewAll
+/>
 
      <CTASection />
 

@@ -1,16 +1,16 @@
 # 🏡 Surya Nikunjam Community Website
 
-A modern full-stack MERN application for **Surya Nikunjam Community**, featuring a public website and an admin dashboard for managing all website content.
+A modern full-stack MERN application for **Surya Nikunjam Community**, featuring a responsive public website and a secure admin dashboard for managing all website content.
 
 ---
 
-## Features
+# ✨ Features
 
-### 🌐 Public Website
+## 🌐 Public Website
 
 - Home Page
-- Hero Slider
-- Welcome Section
+- Hero Banner Slider
+- About Us
 - Mission & Vision
 - Why Choose Us
 - Location Advantages
@@ -23,17 +23,16 @@ A modern full-stack MERN application for **Surya Nikunjam Community**, featuring
 - FAQ
 - Contact Page
 - Book Site Visit
-- Responsive Design
+- Fully Responsive Design
 
 ---
 
-### 🔐 Admin Panel
+## 🔐 Admin Dashboard
 
-Admin can manage:
+The admin panel allows administrators to manage:
 
-- Hero Slider
+- Hero Banners
 - About Content
-- Welcome Content
 - Mission & Vision
 - Why Choose
 - Location Advantages
@@ -49,19 +48,19 @@ Admin can manage:
 
 ---
 
-## 🛠 Tech Stack
+# 🛠 Tech Stack
 
-### Frontend
+## Frontend
 
 - React.js
 - TypeScript
 - React Router
 - Axios
 - Tailwind CSS
-- Lucide React Icons
+- Lucide React
 - SweetAlert2
 
-### Backend
+## Backend
 
 - Node.js
 - Express.js
@@ -70,18 +69,18 @@ Admin can manage:
 - Mongoose
 - JWT Authentication
 - Multer
+- Cloudinary
 - Bcrypt
 
 ---
 
-## 📁 Project Structure
+# 📁 Project Structure
 
-
+```text
 Surya-Nikunjam/
 │
 ├── backend/
 │   ├── src/
-│   ├── uploads/
 │   ├── package.json
 │   └── .env
 │
@@ -93,39 +92,33 @@ Surya-Nikunjam/
 │
 ├── README.md
 └── .gitignore
-
+```
 
 ---
 
 # ⚙ Installation
 
-## 1 Clone Repository
+## 1. Clone Repository
 
-
+```bash
 git clone https://github.com/yourusername/Surya-Nikunjam.git
 
-
-
 cd Surya-Nikunjam
-
+```
 
 ---
 
-## 2 Backend Setup
+## 2. Backend Setup
 
-
+```bash
 cd backend
 
-
-Install dependencies
-
-
 npm install
+```
 
+Create a `.env` file:
 
-Create `.env`
-
-
+```env
 PORT=5000
 
 MONGO_URI=your_mongodb_connection
@@ -134,94 +127,129 @@ JWT_SECRET=your_jwt_secret
 
 SETUP_SECRET=your_setup_secret
 
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
 
-Run backend
+Start the backend:
 
-
+```bash
 npm run dev
-
+```
 
 ---
 
-## 3 Frontend Setup
+## 3. Frontend Setup
 
-
+```bash
 cd ../frontend
 
-
-Install dependencies
-
-
 npm install
+```
 
+Create a `.env` file:
 
-Create `.env`
-
-
+```env
 VITE_API_URL=http://localhost:5000/api
+```
 
-VITE_IMG_URL=http://localhost:5000
+Start the frontend:
 
-
-Run frontend
-
-
+```bash
 npm run dev
-
+```
 
 ---
 
-# Admin Setup
+# 🔐 Admin Setup
 
 The project includes a secure **one-time Admin Setup API**.
 
-After deployment, create the first admin using Postman.
+Create the first administrator using Postman.
 
+**Endpoint**
 
-POST
+```http
+POST /api/admin/create-admin
+```
 
-/api/admin/create-admin
+**Headers**
 
-
-Headers
-
-
+```text
 x-setup-secret: YOUR_SETUP_SECRET
+```
 
+**Request Body**
 
-Body
-
-
+```json
 {
   "name": "Admin",
   "email": "admin@example.com",
   "password": "password123"
 }
+```
 
-
-After the first admin is created, the endpoint automatically becomes unavailable.
+After the first administrator is created, the endpoint is automatically disabled.
 
 ---
 
-# Admin Login
+# 🔑 Admin Login
 
-
+```text
 /admin/login
+```
 
-
-Use the created admin credentials.
-
----
-
-# 📸 Image Upload
-
-Images are uploaded through the Admin Panel and stored inside:
-
-
-backend/uploads/
-
+Use the administrator credentials created during the setup process.
 
 ---
 
+# 📸 Image Uploads
 
+All images uploaded through the Admin Dashboard are stored securely on **Cloudinary**.
 
+Images include:
+
+- Hero Banners
+- About
+- Amenities
+- Lifestyle
+- Villas
+- Gallery
+- Events
+- Testimonials
+- Why Choose
+- Location Advantages
+
+Cloudinary provides:
+
+- Secure cloud storage
+- Optimized image delivery
+- Fast CDN access
+- Automatic image transformations
+
+---
+
+# 🚀 Deployment
+
+### Frontend
+
+- Vercel
+
+### Backend
+
+- Render
+
+### Database
+
+- MongoDB Atlas
+
+### Image Storage
+
+- Cloudinary
+
+---
+
+# 📄 License
+
+This project is developed for the **Surya Nikunjam Community**.

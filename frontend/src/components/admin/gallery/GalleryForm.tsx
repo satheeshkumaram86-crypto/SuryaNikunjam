@@ -10,44 +10,79 @@ interface GalleryFormProps {
   submitText?: string;
 }
 
+type MediaType = "image" | "video" | "youtube";
+
 export default function GalleryForm({
   initialData,
   onSubmit,
   loading,
   submitText = "Save Gallery",
 }: GalleryFormProps) {
-  const API_URL =
-    import.meta.env.VITE_IMG_URL ||
-    "http://localhost:5000";
+  
 
-  const [preview, setPreview] = useState("");
+  const [preview, setPreview] =
+    useState("");
 
-  const [image, setImage] =
+  const [file, setFile] =
     useState<File | null>(null);
 
   const [form, setForm] = useState({
     title: "",
     category: "",
+    mediaType: "image" as MediaType,
+    youtubeUrl: "",
     order: 1,
     isActive: true,
   });
-
+const MAX_FILE_SIZE = 500 * 1024 * 1024; // 100 MB
   useEffect(() => {
-    if (initialData) {
-      setForm({
-        title: initialData.title || "",
-        category: initialData.category || "",
-        order: initialData.order || 1,
-        isActive: initialData.isActive,
-      });
+    if (!initialData) return;
 
+    setForm({
+      title: initialData.title || "",
+      category:
+        initialData.category || "",
+      mediaType:
+        initialData.mediaType ||
+        "image",
+      youtubeUrl:
+        initialData.youtubeUrl || "",
+      order: initialData.order || 1,
+      isActive:
+        initialData.isActive,
+    });
+
+    if (
+      initialData.mediaType ===
+      "image"
+    ) {
       setPreview(
         initialData.image
-          ? `${API_URL}${initialData.image}`
+          ? `${initialData.image}`
           : ""
       );
     }
-  }, [initialData, API_URL]);
+
+    if (
+      initialData.mediaType ===
+      "video"
+    ) {
+      setPreview(
+        initialData.video
+          ? `${initialData.video}`
+          : ""
+      );
+    }
+
+    if (
+      initialData.mediaType ===
+      "youtube"
+    ) {
+      setPreview(
+        initialData.youtubeUrl || ""
+      );
+    }
+  }, [initialData]);
 
   useEffect(() => {
     return () => {
@@ -57,76 +92,210 @@ export default function GalleryForm({
     };
   }, [preview]);
 
-  const changeHandler = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement
-    >
+  const getYoutubeEmbedUrl = (
+    url: string
   ) => {
-    const { name, value } = e.target;
+    if (!url) return "";
+
+    if (url.includes("watch?v=")) {
+      return url.replace(
+        "watch?v=",
+        "embed/"
+      );
+    }
+
+    if (url.includes("youtu.be/")) {
+      const id =
+        url.split("youtu.be/")[1];
+      return `https://www.youtube.com/embed/${id}`;
+    }
+
+    if (url.includes("/shorts/")) {
+      const id =
+        url.split("/shorts/")[1];
+      return `https://www.youtube.com/embed/${id}`;
+    }
+
+    return url;
+  };
+
+  const changeHandler = (
+  e: React.ChangeEvent<
+    HTMLInputElement | HTMLSelectElement
+  >
+) => {
+  const { name, value } = e.target;
+
+  if (name === "mediaType") {
+    if (preview.startsWith("blob:")) {
+      URL.revokeObjectURL(preview);
+    }
+
+    setFile(null);
+    setPreview("");
 
     setForm((prev) => ({
       ...prev,
-      [name]:
-        name === "order"
-          ? Number(value)
-          : value,
+      mediaType: value as MediaType,
+      youtubeUrl: "",
     }));
-  };
 
-  const imageHandler = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (!e.target.files?.length) return;
+    return;
+  }
 
-    const file = e.target.files[0];
+  setForm((prev) => ({
+    ...prev,
+    [name]:
+      name === "order"
+        ? Number(value)
+        : value,
+  }));
+};
 
-    setImage(file);
+  const fileHandler = (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
+  if (!e.target.files?.length) return;
 
-    setPreview(URL.createObjectURL(file));
-  };
+  const selected = e.target.files[0];
 
+  // Validate file type
+  if (
+    form.mediaType === "image" &&
+    !selected.type.startsWith("image/")
+  ) {
+    Swal.fire({
+      icon: "warning",
+      title: "Please select an image file.",
+    });
+
+    e.target.value = "";
+    return;
+  }
+
+  if (
+    form.mediaType === "video" &&
+    !selected.type.startsWith("video/")
+  ) {
+    Swal.fire({
+      icon: "warning",
+      title: "Please select a video file.",
+    });
+
+    e.target.value = "";
+    return;
+  }
+
+  // Validate size
+  if (selected.size > MAX_FILE_SIZE) {
+  Swal.fire({
+    icon: "warning",
+    title: "Maximum upload size is 100 MB.",
+  });
+
+  setFile(null);
+  e.target.value = "";
+  return;
+}
+
+  // Remove previous preview
+  if (preview.startsWith("blob:")) {
+    URL.revokeObjectURL(preview);
+  }
+
+  setFile(selected);
+  setPreview(URL.createObjectURL(selected));
+};
   const submitHandler = async (
-    e: React.FormEvent
-  ) => {
-    e.preventDefault();
+  e: React.FormEvent
+) => {
+  e.preventDefault();
 
-    if (!image && !initialData?.image) {
+if (loading) return;
+
+  if (!form.title.trim()) {
+    Swal.fire({
+      icon: "warning",
+      title: "Gallery title is required.",
+    });
+
+    return;
+  }
+
+  if (form.mediaType === "youtube") {
+    const youtubeRegex =
+/^(https?:\/\/)?((www|m)\.)?(youtube\.com|youtu\.be)\//;
+
+    if (
+      !form.youtubeUrl.trim() ||
+      !youtubeRegex.test(form.youtubeUrl)
+    ) {
       Swal.fire({
         icon: "warning",
-        title: "Please select an image.",
+        title: "Please enter a valid YouTube URL.",
       });
 
       return;
     }
+  } else {
+    if (
+      !file &&
+      !initialData?.image &&
+      !initialData?.video
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title:
+          form.mediaType === "image"
+            ? "Please select an image."
+            : "Please select a video.",
+      });
 
-    const formData = new FormData();
-
-    formData.append(
-      "title",
-      form.title.trim()
-    );
-
-    formData.append(
-      "category",
-      form.category.trim()
-    );
-
-    formData.append(
-      "order",
-      String(form.order)
-    );
-
-    formData.append(
-      "isActive",
-      String(form.isActive)
-    );
-
-    if (image) {
-      formData.append("image", image);
+      return;
     }
+  }
 
-    await onSubmit(formData);
-  };
+  const formData = new FormData();
+
+  formData.append(
+    "title",
+    form.title.trim()
+  );
+
+  formData.append(
+    "category",
+    form.category.trim()
+  );
+
+  formData.append(
+    "mediaType",
+    form.mediaType
+  );
+
+  formData.append(
+    "youtubeUrl",
+    form.youtubeUrl.trim()
+  );
+
+  formData.append(
+    "order",
+    String(form.order)
+  );
+
+  formData.append(
+    "isActive",
+    String(form.isActive)
+  );
+
+  if (
+    file &&
+    form.mediaType !== "youtube"
+  ) {
+    formData.append("file", file);
+  }
+
+  await onSubmit(formData);
+};
 
   return (
     <form
@@ -145,7 +314,9 @@ export default function GalleryForm({
           name="title"
           required
           value={form.title}
-          onChange={changeHandler}
+          onChange={
+            changeHandler
+          }
           className="w-full border rounded-lg p-3"
         />
       </div>
@@ -154,23 +325,116 @@ export default function GalleryForm({
 
       <div>
         <label className="block mb-2 font-medium">
-          Category 
+          Category
         </label>
 
         <input
           type="text"
           name="category"
+          value={
+            form.category
+          }
+          onChange={
+            changeHandler
+          }
           placeholder="Example: Villas"
-          value={form.category}
-          onChange={changeHandler}
           className="w-full border rounded-lg p-3"
         />
       </div>
 
+      {/* Media Type */}
+
+      <div>
+        <label className="block mb-2 font-medium">
+          Media Type
+        </label>
+
+        <select
+          name="mediaType"
+          value={
+            form.mediaType
+          }
+          onChange={
+            changeHandler
+          }
+          className="w-full border rounded-lg p-3"
+        >
+          <option value="image">
+            Image
+          </option>
+
+          <option value="video">
+            Uploaded Video
+          </option>
+
+          <option value="youtube">
+            YouTube Video
+          </option>
+        </select>
+      </div>
+
+      {/* Upload */}
+
+      {form.mediaType !==
+        "youtube" && (
+        <div>
+          <label className="block mb-2 font-medium">
+            {form.mediaType ===
+            "image"
+              ? "Upload Image"
+              : "Upload Video"}
+          </label>
+
+          <input
+  type="file"
+  accept={
+    form.mediaType === "image"
+      ? "image/jpeg,image/png,image/webp"
+      : "video/mp4,video/webm,video/ogg,video/quicktime,video/x-msvideo,video/x-matroska"
+  }
+  onChange={fileHandler}
+  className="w-full"
+/>
+
+<p className="text-sm text-gray-500 mt-2">
+  Maximum upload size: 100 MB
+</p>
+
+{file && (
+  <p className="text-sm text-green-600 mt-2">
+    Selected: {file.name}
+  </p>
+)}
+        </div>
+      )}
+
+      {/* Youtube */}
+
+      {form.mediaType ===
+        "youtube" && (
+        <div>
+          <label className="block mb-2 font-medium">
+            YouTube URL
+          </label>
+
+          <input
+            type="url"
+            name="youtubeUrl"
+            value={
+              form.youtubeUrl
+            }
+            onChange={
+              changeHandler
+            }
+            placeholder="Paste YouTube link (Watch, Shorts or youtu.be)"
+            className="w-full border rounded-lg p-3"
+          />
+        </div>
+      )}
+
       {/* Order & Status */}
 
       <div className="grid md:grid-cols-2 gap-5">
-
         <div>
           <label className="block mb-2 font-medium">
             Display Order
@@ -179,10 +443,11 @@ export default function GalleryForm({
           <input
             type="number"
             min={1}
-            max={100}
             name="order"
             value={form.order}
-            onChange={changeHandler}
+            onChange={
+              changeHandler
+            }
             className="w-full border rounded-lg p-3"
           />
         </div>
@@ -193,13 +458,23 @@ export default function GalleryForm({
           </label>
 
           <select
-            value={String(form.isActive)}
-            onChange={(e) =>
-              setForm((prev) => ({
-                ...prev,
-                isActive:
-                  e.target.value === "true",
-              }))
+            value={String(
+              form.isActive
+            )}
+            onChange={(
+              e
+            ) =>
+              setForm(
+                (
+                  prev
+                ) => ({
+                  ...prev,
+                  isActive:
+                    e.target
+                      .value ===
+                    "true",
+                })
+              )
             }
             className="w-full border rounded-lg p-3"
           >
@@ -212,39 +487,62 @@ export default function GalleryForm({
             </option>
           </select>
         </div>
-
-      </div>
-
-      {/* Upload */}
-
-      <div>
-        <label className="block mb-2 font-medium">
-          Gallery Image
-        </label>
-
-        <input
-          type="file"
-          accept="image/*"
-          onChange={imageHandler}
-          className="w-full"
-        />
       </div>
 
       {/* Preview */}
 
-      {preview && (
-        <div>
-          <label className="block mb-2 font-medium">
-            Image Preview
-          </label>
+      {form.mediaType ===
+        "image" &&
+        preview && (
+          <div>
+            <label className="block mb-2 font-medium">
+              Image Preview
+            </label>
 
-          <img
-            src={preview}
-            alt="Gallery Preview"
-            className="w-96 h-60 rounded-lg border object-cover"
-          />
-        </div>
-      )}
+            <img
+              src={preview}
+              alt="Preview"
+              className="w-full max-w-md h-64 rounded-lg border object-cover"
+            />
+          </div>
+        )}
+
+      {form.mediaType ===
+        "video" &&
+        preview && (
+          <div>
+            <label className="block mb-2 font-medium">
+              Video Preview
+            </label>
+
+            <video
+              controls
+              className="w-full max-w-md h-64 rounded-lg border"
+            >
+              <source
+                src={preview}
+              />
+            </video>
+          </div>
+        )}
+
+      {form.mediaType ===
+        "youtube" &&
+        form.youtubeUrl && (
+          <div>
+            <label className="block mb-2 font-medium">
+              YouTube Preview
+            </label>
+
+            <iframe
+              className="w-full max-w-md h-60 rounded-lg border"
+              src={getYoutubeEmbedUrl(
+                form.youtubeUrl
+              )}
+              allowFullScreen
+            />
+          </div>
+        )}
 
       {/* Submit */}
 

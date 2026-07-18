@@ -5,14 +5,19 @@ import TestimonialCard from "./TestimonialCard";
 import { getTestimonials } from "../../../services/testimonialService";
 
 import type { Testimonial } from "../../../types/testimonial";
+import { Link } from "react-router-dom";
 
-export default function TestimonialSection() {
+interface TestimonialSectionProps {
+  limit?: number;
+  showViewAll?: boolean;
+}
+
+export default function TestimonialSection({
+  limit,
+  showViewAll = false,
+}: TestimonialSectionProps) {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadTestimonials();
-  }, []);
 
   const loadTestimonials = async () => {
     try {
@@ -35,7 +40,11 @@ export default function TestimonialSection() {
               a.order - b.order
           );
 
-        setTestimonials(testimonialList);
+        setTestimonials(
+  limit
+    ? testimonialList.slice(0, limit)
+    : testimonialList
+);
       }
     } catch (error) {
       console.error(
@@ -46,6 +55,10 @@ export default function TestimonialSection() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+  loadTestimonials();
+}, [limit]);
 
   if (loading) {
     return (
@@ -110,7 +123,16 @@ export default function TestimonialSection() {
         )}
 
       </div>
-
+{showViewAll && testimonials.length > 0 && (
+  <div className="mt-10 text-center">
+    <Link
+      to="/testimonials"
+      className="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition"
+    >
+      View All Testimonials
+    </Link>
+  </div>
+)}
     </section>
   );
 }

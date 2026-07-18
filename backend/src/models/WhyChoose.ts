@@ -9,7 +9,7 @@ const whyChooseSchema = new mongoose.Schema(
 
     description: {
       type: String,
-      required: true,
+      default: "",
     },
 
     icon: {

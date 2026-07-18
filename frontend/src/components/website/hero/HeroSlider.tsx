@@ -17,9 +17,6 @@ import type { Banner } from "../../../types/banner";
 import { getActiveBanners } from "../../../services/websiteBannerService";
 
 export default function HeroSlider() {
-  const API_URL =
-    import.meta.env.VITE_IMG_URL ||
-    "http://localhost:5000";
 
   const [banners, setBanners] =
     useState<Banner[]>([]);
@@ -85,7 +82,7 @@ export default function HeroSlider() {
           <div className="relative h-full">
 
             <img
-              src={`${API_URL}${banner.image}`}
+              src={banner.image}
               className="w-full h-full object-cover"
               alt={banner.title}
             />

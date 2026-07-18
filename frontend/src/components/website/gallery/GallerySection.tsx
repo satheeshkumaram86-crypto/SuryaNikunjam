@@ -1,56 +1,66 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import GalleryCard from "./GalleryCard";
 import GalleryModal from "./GalleryModal";
 
-import { getGalleries } from "../../../services/galleryService";
+import { getGallery } from "../../../services/galleryService";
 
 import type { Gallery } from "../../../types/gallery";
 
-export default function GallerySection() {
+interface GallerySectionProps {
+  limit?: number;
+  showViewAll?: boolean;
+}
+
+export default function GallerySection({
+  limit,
+  showViewAll = false,
+}: GallerySectionProps) {
   const [galleries, setGalleries] = useState<Gallery[]>([]);
   const [selectedGallery, setSelectedGallery] =
     useState<Gallery | null>(null);
 
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadGallery();
-  }, []);
-
-  const loadGallery = async () => {
+  const loadGallery = useCallback(async () => {
     try {
       setLoading(true);
 
-      const response = await getGalleries();
-      //console.log("Gallery Response:", response);
+      const response = await getGallery();
 
       if (response.success) {
-        const galleryList = (
-          response.gallery ||
-          response.galleries ||
-          response.data ||
-          []
-        )
-          .filter(
-            (item: Gallery) => item.isActive
-          )
-          .sort(
-            (a: Gallery, b: Gallery) =>
-              a.order - b.order
-          );
+        const galleryData: Gallery[] = Array.isArray(response.gallery)
+          ? response.gallery
+          : Array.isArray(response.galleries)
+          ? response.galleries
+          : Array.isArray(response.data)
+          ? response.data
+          : [];
 
-        setGalleries(galleryList);
+        const galleryList = galleryData
+          .filter((item) => item.isActive)
+          .sort((a, b) => a.order - b.order);
+
+        setGalleries(
+          limit
+            ? galleryList.slice(0, limit)
+            : galleryList
+        );
+      } else {
+        setGalleries([]);
       }
     } catch (error) {
-      console.error(
-        "Failed to load gallery",
-        error
-      );
+      console.error("Failed to load gallery:", error);
+      setGalleries([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [limit]);
+
+  useEffect(() => {
+    loadGallery();
+  }, [loadGallery]);
 
   if (loading) {
     return (
@@ -67,13 +77,10 @@ export default function GallerySection() {
   return (
     <>
       <section className="pt-32 py-20 bg-gray-50">
-
         <div className="max-w-7xl mx-auto px-4">
-
           {/* Heading */}
 
           <div className="text-center mb-16">
-
             <span className="text-green-600 font-semibold uppercase tracking-widest">
               Our Gallery
             </span>
@@ -85,42 +92,47 @@ export default function GallerySection() {
             <div className="w-24 h-1 bg-green-600 mx-auto mt-5 rounded-full"></div>
 
             <p className="max-w-3xl mx-auto mt-6 text-gray-600 leading-8 text-lg">
-              Take a glimpse into the peaceful
-              surroundings, premium villas,
-              beautifully landscaped gardens,
-              and vibrant community life at
-              Surya Nikunjam.
+              Explore beautiful images, uploaded videos and YouTube
+              videos showcasing Surya Nikunjam Community.
             </p>
-
           </div>
 
           {/* Empty State */}
 
           {galleries.length === 0 ? (
             <div className="bg-white rounded-xl shadow p-12 text-center">
-              <p className="text-xl text-gray-500">
-                No gallery images available.
+              <h3 className="text-2xl font-semibold text-gray-700">
+                Gallery Coming Soon
+              </h3>
+
+              <p className="text-gray-500 mt-3">
+                Images and videos will appear here soon.
               </p>
             </div>
           ) : (
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-
               {galleries.map((gallery) => (
                 <GalleryCard
-                  key={gallery._id}
+                  key={gallery._id || gallery.title}
                   gallery={gallery}
                   onClick={setSelectedGallery}
                 />
               ))}
-
             </div>
           )}
-
         </div>
 
+        {showViewAll && galleries.length > 0 && (
+          <div className="mt-12 text-center">
+            <Link
+              to="/gallery"
+              className="inline-flex items-center px-8 py-3 rounded-lg bg-green-600 hover:bg-green-700 text-white transition"
+            >
+              View All Gallery →
+            </Link>
+          </div>
+        )}
       </section>
-
-      {/* Lightbox */}
 
       <GalleryModal
         gallery={selectedGallery}

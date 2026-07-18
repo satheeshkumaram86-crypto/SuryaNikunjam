@@ -207,11 +207,12 @@ useEffect(() => {
 
       {/* Mobile Menu */}
 
-      <MobileMenu
-        open={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-        menus={menus}
-      />
+     <MobileMenu
+  open={mobileOpen}
+  onClose={() => setMobileOpen(false)}
+  menus={menus}
+  moreMenus={moreMenus}
+/>
     </>
   );
 }

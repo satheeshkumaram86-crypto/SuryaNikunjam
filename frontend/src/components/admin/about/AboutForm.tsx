@@ -13,9 +13,6 @@ export default function AboutForm({
   onSubmit,
   loading,
 }: AboutFormProps) {
-  const API_URL =
-  import.meta.env.VITE_IMG_URL ||
-  "http://localhost:5000";
 
 const [welcomePreview, setWelcomePreview] =
   useState("");
@@ -111,16 +108,12 @@ const [form, setForm] = useState({
   });
 
   if (initialData.welcomeImage) {
-    setWelcomePreview(
-      `${API_URL}${initialData.welcomeImage}`
-    );
-  }
+  setWelcomePreview(initialData.welcomeImage);
+}
 
-  if (initialData.aboutImage) {
-    setAboutPreview(
-      `${API_URL}${initialData.aboutImage}`
-    );
-  }
+if (initialData.aboutImage) {
+  setAboutPreview(initialData.aboutImage);
+}
 
 }, [initialData]);
 

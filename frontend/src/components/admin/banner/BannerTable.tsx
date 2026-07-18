@@ -14,7 +14,6 @@ export default function BannerTable({
   onDelete,
   onToggle,
 }: Props) {
-  const api_base_url = import.meta.env.VITE_API_URL;
 
   return (
     <div className="bg-white rounded-xl shadow overflow-x-auto">
@@ -39,7 +38,7 @@ export default function BannerTable({
                 {/* Image */}
                 <td className="px-4 py-3">
                   <img
-                   src={`${api_base_url}${banner.image}`}
+                   src={banner.image}
                     alt={banner.title}
                     className="w-36 h-20 rounded-lg object-cover border"
                   />

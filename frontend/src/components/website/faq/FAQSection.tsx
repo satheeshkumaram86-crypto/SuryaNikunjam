@@ -5,8 +5,17 @@ import FAQItem from "./FAQItem";
 import { getFAQs } from "../../../services/faqService";
 
 import type { FAQ } from "../../../types/faq";
+import { Link } from "react-router-dom";
 
-export default function FAQSection() {
+interface FAQSectionProps {
+  limit?: number;
+  showViewAll?: boolean;
+}
+
+export default function FAQSection({
+  limit,
+  showViewAll = false,
+}: FAQSectionProps) {
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -15,9 +24,6 @@ export default function FAQSection() {
     0
   );
 
-  useEffect(() => {
-    loadFAQs();
-  }, []);
 
   const loadFAQs = async () => {
     try {
@@ -40,7 +46,11 @@ export default function FAQSection() {
               a.order - b.order
           );
 
-        setFaqs(faqList);
+       setFaqs(
+  limit
+    ? faqList.slice(0, limit)
+    : faqList
+);
 
         if (faqList.length === 0) {
           setOpenIndex(null);
@@ -55,6 +65,11 @@ export default function FAQSection() {
       setLoading(false);
     }
   };
+
+  
+  useEffect(() => {
+  loadFAQs();
+}, [limit]);
 
   if (loading) {
     return (
@@ -127,7 +142,16 @@ export default function FAQSection() {
         )}
 
       </div>
-
+        {showViewAll && faqs.length > 0 && (
+  <div className="mt-10 text-center">
+    <Link
+      to="/faq"
+      className="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition"
+    >
+      View All FAQs
+    </Link>
+  </div>
+)}
     </section>
   );
 }

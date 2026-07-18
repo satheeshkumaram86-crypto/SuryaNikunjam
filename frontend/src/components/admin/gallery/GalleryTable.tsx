@@ -14,15 +14,32 @@ export default function GalleryTable({
   onDelete,
   onToggle,
 }: GalleryTableProps) {
-  const API_URL =
-    import.meta.env.VITE_IMG_URL ||
-    "http://localhost:5000";
+  
+const getYoutubeEmbedUrl = (url: string) => {
+  if (!url) return "";
+
+  if (url.includes("watch?v=")) {
+    return url.replace("watch?v=", "embed/");
+  }
+
+  if (url.includes("youtu.be/")) {
+    const id = url.split("youtu.be/")[1];
+    return `https://www.youtube.com/embed/${id}`;
+  }
+
+  if (url.includes("/shorts/")) {
+    const id = url.split("/shorts/")[1];
+    return `https://www.youtube.com/embed/${id}`;
+  }
+
+  return url;
+};
 
   if (gallery.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow p-12 text-center">
         <p className="text-gray-500 text-lg">
-          No gallery images found.
+          No gallery items found.
         </p>
       </div>
     );
@@ -30,21 +47,21 @@ export default function GalleryTable({
 
   return (
     <div className="bg-white rounded-xl shadow overflow-x-auto">
-      <table className="min-w-full">
+      <table className="min-w-full table-auto">
 
         <thead className="bg-gray-100">
           <tr>
             <th className="px-4 py-3 text-left">
-              Image
+              Preview
             </th>
 
             <th className="px-4 py-3 text-left">
               Title
             </th>
 
-            {/*<th className="px-4 py-3 text-left">
-              Category
-            </th>*/}
+            <th className="px-4 py-3 text-center">
+              Type
+            </th>
 
             <th className="px-4 py-3 text-center">
               Order
@@ -66,29 +83,88 @@ export default function GalleryTable({
               key={item._id}
               className="border-t hover:bg-gray-50"
             >
-              {/* Image */}
+              {/* Preview */}
 
-              <td className="px-4 py-3">
-                <img
-                  src={`${API_URL}${item.image}`}
-                  alt={item.title}
-                  className="w-28 h-20 rounded-lg border object-cover"
-                />
-              </td>
+             <td className="px-4 py-3">
 
+  {/* Image */}
+  {item.mediaType === "image" && (
+    item.image ? (
+      <img
+        src={item.image}
+        alt={item.title}
+        loading="lazy"
+        className="w-28 h-20 rounded-lg border object-cover"
+      />
+    ) : (
+      <span className="text-gray-400 text-sm">
+        No Image
+      </span>
+    )
+  )}
+
+  {/* Uploaded Video */}
+  {item.mediaType === "video" && (
+    item.video ? (
+      <video
+        muted
+        playsInline
+        preload="metadata"
+        className="w-28 h-20 rounded-lg border object-cover"
+      >
+        <source src={item.video} />
+      </video>
+    ) : (
+      <span className="text-gray-400 text-sm">
+        No Video
+      </span>
+    )
+  )}
+
+  {/* YouTube */}
+ {item.mediaType === "youtube" && (
+  item.youtubeUrl ? (
+    <iframe
+      className="w-28 h-20 rounded-lg border"
+      src={getYoutubeEmbedUrl(item.youtubeUrl)}
+      title={item.title}
+      allowFullScreen
+    />
+  ) : (
+    <span className="text-gray-400 text-sm">
+      No YouTube Video
+    </span>
+  )
+)}
+
+</td>
               {/* Title */}
 
-              <td className="px-4 py-3 font-medium">
-                {item.title}
-              </td>
+              <td className="px-4 py-3 font-medium max-w-xs">
+  <div className="truncate">
+    {item.title}
+  </div>
+</td>
 
-              {/* Category */}
+              {/* Type */}
 
-              {/*<td className="px-4 py-3">
-                <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm">
-                  {item.category}
+              <td className="px-4 py-3 text-center">
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    item.mediaType === "image"
+                      ? "bg-blue-100 text-blue-700"
+                      : item.mediaType === "video"
+                      ? "bg-purple-100 text-purple-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {item.mediaType === "image"
+                    ? "Image"
+                    : item.mediaType === "video"
+                    ? "Video"
+                    : "YouTube"}
                 </span>
-              </td>*/}
+              </td>
 
               {/* Order */}
 
@@ -121,13 +197,13 @@ export default function GalleryTable({
                 <div className="flex justify-center gap-4">
 
                   <Link
-                    to={`/admin/gallery/edit/${item._id}`}
+                    aria-label="Edit Gallery" to={`/admin/gallery/edit/${item._id}`}
                     className="text-blue-600 hover:text-blue-800"
                   >
                     <Pencil size={18} />
                   </Link>
 
-                  <button
+                  <button aria-label="Delete Gallery"
                     onClick={() =>
                       onDelete(item._id!)
                     }
@@ -138,6 +214,7 @@ export default function GalleryTable({
 
                 </div>
               </td>
+
             </tr>
           ))}
         </tbody>

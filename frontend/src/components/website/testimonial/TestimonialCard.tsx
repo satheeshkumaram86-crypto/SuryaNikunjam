@@ -9,9 +9,6 @@ interface TestimonialCardProps {
 export default function TestimonialCard({
   testimonial,
 }: TestimonialCardProps) {
-  const API_URL =
-    import.meta.env.VITE_IMG_URL ||
-    "http://localhost:5000";
 
   return (
     <div className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 p-8 relative">
@@ -25,13 +22,13 @@ export default function TestimonialCard({
       {/* Profile */}
 
       <div className="flex items-center gap-5">
-
+{testimonial.image && (
         <img
-          src={`${API_URL}${testimonial.image}`}
+          src={testimonial.image}
           alt={testimonial.name}
           className="w-20 h-20 rounded-full object-cover border-4 border-green-100"
         />
-
+)}
         <div>
 
           <h3 className="text-xl font-bold text-gray-900">

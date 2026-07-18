@@ -11,9 +11,6 @@ export default function EventDetailsSection() {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const API_URL =
-    import.meta.env.VITE_IMG_URL ||
-    "http://localhost:5000";
 
   useEffect(() => {
     if (id) {
@@ -80,13 +77,13 @@ export default function EventDetailsSection() {
         </Link>
 
         {/* Image */}
-
+{event.image && (
         <img
-          src={`${API_URL}${event.image}`}
+          src={event.image}
           alt={event.title}
           className="w-full h-[500px] object-cover rounded-2xl shadow-lg"
         />
-
+)}
         {/* Content */}
 
         <div className="bg-white rounded-2xl shadow-lg p-8 mt-8">

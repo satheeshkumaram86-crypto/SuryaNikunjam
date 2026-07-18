@@ -5,14 +5,20 @@ import LifestyleCard from "./LifestyleCard";
 import { getLifestyles } from "../../../services/lifestyleService";
 
 import type { Lifestyle } from "../../../types/lifestyle";
+import { Link } from "react-router-dom";
 
-export default function LifestyleSection() {
+interface LifestyleSectionProps {
+  limit?: number;
+  showViewAll?: boolean;
+}
+
+export default function LifestyleSection({
+  limit,
+  showViewAll = false,
+}: LifestyleSectionProps) {
   const [lifestyles, setLifestyles] = useState<Lifestyle[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadLifestyles();
-  }, []);
 
   const loadLifestyles = async () => {
     try {
@@ -30,7 +36,11 @@ export default function LifestyleSection() {
               a.order - b.order
           );
 
-        setLifestyles(activeLifestyles);
+        setLifestyles(
+  limit
+    ? activeLifestyles.slice(0, limit)
+    : activeLifestyles
+);
       }
     } catch (error) {
       console.error(
@@ -41,6 +51,9 @@ export default function LifestyleSection() {
       setLoading(false);
     }
   };
+ useEffect(() => {
+  loadLifestyles();
+}, [limit]);
 
   if (loading) {
     return (
@@ -105,7 +118,16 @@ export default function LifestyleSection() {
         )}
 
       </div>
-
+{showViewAll && lifestyles.length > 0 && (
+  <div className="mt-10 text-center">
+    <Link
+      to="/lifestyles"
+      className="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition"
+    >
+      View All Lifestyle
+    </Link>
+  </div>
+)}
     </section>
   );
 }

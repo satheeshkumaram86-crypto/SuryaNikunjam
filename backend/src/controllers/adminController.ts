@@ -10,7 +10,7 @@ export const loginAdmin = async (
     const { email, password } = req.body;
 
     const admin = await Admin.findOne({ email });
-    console.log("Admin:", admin);
+    //console.log("Admin:", admin);
 
     if (!admin) {
       return res.status(401).json({

@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
-import fs from "fs";
-import path from "path";
-
 import Testimonial from "../models/Testimonial";
+import cloudinary from "../config/cloudinary";
+
 
 // ===============================
 // Get All Testimonials
@@ -12,24 +11,35 @@ export const getTestimonials = async (
   res: Response
 ) => {
   try {
-    const testimonials = await Testimonial.find().sort({
-      order: 1,
-      createdAt: -1,
-    });
+
+    const testimonials =
+      await Testimonial.find().sort({
+        order: 1,
+        createdAt: -1,
+      });
+
 
     res.status(200).json({
       success: true,
       testimonials,
     });
-  } catch (error) {
+
+
+  } catch (error: any) {
+
     console.error(error);
 
     res.status(500).json({
-      success: false,
-      message: "Failed to fetch testimonials.",
+      success:false,
+      message:
+        error?.message ||
+        "Failed to fetch testimonials.",
     });
+
   }
 };
+
+
 
 // ===============================
 // Get Single Testimonial
@@ -38,31 +48,44 @@ export const getTestimonialById = async (
   req: Request,
   res: Response
 ) => {
-  try {
-    const testimonial = await Testimonial.findById(
-      req.params.id
-    );
 
-    if (!testimonial) {
+  try {
+
+    const testimonial =
+      await Testimonial.findById(
+        req.params.id
+      );
+
+
+    if(!testimonial){
       return res.status(404).json({
-        success: false,
-        message: "Testimonial not found.",
+        success:false,
+        message:"Testimonial not found.",
       });
     }
 
+
     res.status(200).json({
-      success: true,
+      success:true,
       testimonial,
     });
-  } catch (error) {
+
+
+  } catch(error:any){
+
     console.error(error);
 
     res.status(500).json({
-      success: false,
-      message: "Failed to fetch testimonial.",
+      success:false,
+      message:
+        error?.message ||
+        "Failed to fetch testimonial.",
     });
+
   }
 };
+
+
 
 // ===============================
 // Create Testimonial
@@ -71,38 +94,110 @@ export const createTestimonial = async (
   req: Request,
   res: Response
 ) => {
+
   try {
+
+    const {
+      name,
+      designation,
+      message,
+      rating,
+      featured,
+      order,
+      isActive,
+    } = req.body;
+
+
+
+    let image = "";
+
+
+    // Upload image to Cloudinary
+    if(req.file){
+
+      const file =
+        req.file as Express.Multer.File;
+
+
+      const result =
+        await cloudinary.uploader.upload(
+          file.path,
+          {
+            folder:
+            "surya-nikunjam/testimonials",
+          }
+        );
+
+
+      image = result.secure_url;
+
+    }
+
+
+
     const testimonial =
       await Testimonial.create({
-        name: req.body.name,
-        designation:
-          req.body.designation,
-        message: req.body.message,
-        rating: Number(req.body.rating),
+
+        name,
+
+        designation,
+
+        message,
+
+        rating:
+          rating
+          ? Number(rating)
+          : 0,
+
+
         featured:
-          req.body.featured === "true",
-        order: Number(req.body.order),
+          featured === "true" ||
+          featured === true,
+
+
+        order:
+          order
+          ? Number(order)
+          : 0,
+
+
         isActive:
-          req.body.isActive === "true",
-        image: req.file
-          ? `/uploads/testimonials/${req.file.filename}`
-          : "",
+          isActive === "true" ||
+          isActive === true,
+
+
+        image,
+
       });
 
+
+
     res.status(201).json({
-      success: true,
+      success:true,
+      message:
+      "Testimonial created successfully.",
       testimonial,
     });
-  } catch (error) {
+
+
+
+  } catch(error:any){
+
     console.error(error);
 
     res.status(500).json({
-      success: false,
+      success:false,
       message:
+        error?.message ||
         "Failed to create testimonial.",
     });
+
   }
+
 };
+
+
+
 
 // ===============================
 // Update Testimonial
@@ -111,70 +206,158 @@ export const updateTestimonial = async (
   req: Request,
   res: Response
 ) => {
+
+
   try {
+
+
     const testimonial =
       await Testimonial.findById(
         req.params.id
       );
 
-    if (!testimonial) {
+
+    if(!testimonial){
+
       return res.status(404).json({
-        success: false,
-        message: "Testimonial not found.",
+        success:false,
+        message:
+        "Testimonial not found.",
       });
+
     }
 
-    // Delete old image
-    if (req.file) {
-      if (testimonial.image) {
-        const oldImagePath = path.join(
-          __dirname,
-          "../../",
-          testimonial.image
-        );
 
-        if (
-          fs.existsSync(oldImagePath)
-        ) {
-          fs.unlinkSync(oldImagePath);
-        }
-      }
 
-      testimonial.image = `/uploads/testimonials/${req.file.filename}`;
-    }
+    testimonial.name =
+      req.body.name;
 
-    testimonial.name = req.body.name;
+
     testimonial.designation =
       req.body.designation;
+
+
     testimonial.message =
       req.body.message;
-    testimonial.rating = Number(
-      req.body.rating
-    );
+
+
+    testimonial.rating =
+      Number(req.body.rating);
+
+
+
     testimonial.featured =
-      req.body.featured === "true";
-    testimonial.order = Number(
-      req.body.order
-    );
+      req.body.featured === "true" ||
+      req.body.featured === true;
+
+
+
+    testimonial.order =
+      Number(req.body.order);
+
+
+
     testimonial.isActive =
-      req.body.isActive === "true";
+      req.body.isActive === "true" ||
+      req.body.isActive === true;
+
+
+
+
+    // If new image uploaded
+    if(req.file){
+
+
+      // Delete old Cloudinary image
+
+      if(testimonial.image){
+
+        try{
+
+          const parts =
+            testimonial.image.split("/");
+
+
+          const filename =
+            parts[parts.length - 1];
+
+
+          const publicId =
+            "surya-nikunjam/testimonials/" +
+            filename.split(".")[0];
+
+
+          await cloudinary.uploader.destroy(
+            publicId
+          );
+
+
+        }catch(err){
+
+          console.log(
+            "Old testimonial image delete failed"
+          );
+
+        }
+
+      }
+
+
+
+
+      const file =
+        req.file as Express.Multer.File;
+
+
+
+      const result =
+        await cloudinary.uploader.upload(
+          file.path,
+          {
+            folder:
+            "surya-nikunjam/testimonials",
+          }
+        );
+
+
+      testimonial.image =
+        result.secure_url;
+
+    }
+
+
 
     await testimonial.save();
 
+
+
     res.status(200).json({
-      success: true,
+      success:true,
+      message:
+      "Testimonial updated successfully.",
       testimonial,
     });
-  } catch (error) {
+
+
+
+  } catch(error:any){
+
     console.error(error);
 
+
     res.status(500).json({
-      success: false,
+      success:false,
       message:
+        error?.message ||
         "Failed to update testimonial.",
     });
+
   }
+
 };
+
+
+
 
 // ===============================
 // Delete Testimonial
@@ -183,90 +366,164 @@ export const deleteTestimonial = async (
   req: Request,
   res: Response
 ) => {
+
+
   try {
+
+
     const testimonial =
       await Testimonial.findById(
         req.params.id
       );
 
-    if (!testimonial) {
+
+    if(!testimonial){
+
       return res.status(404).json({
-        success: false,
-        message: "Testimonial not found.",
+        success:false,
+        message:
+        "Testimonial not found.",
       });
+
     }
 
-    // Delete image
-    if (testimonial.image) {
-      const imagePath = path.join(
-        __dirname,
-        "../../",
-        testimonial.image
-      );
 
-      if (
-        fs.existsSync(imagePath)
-      ) {
-        fs.unlinkSync(imagePath);
+
+    // Delete Cloudinary image
+
+    if(testimonial.image){
+
+      try{
+
+        const parts =
+          testimonial.image.split("/");
+
+
+        const filename =
+          parts[parts.length - 1];
+
+
+        const publicId =
+          "surya-nikunjam/testimonials/" +
+          filename.split(".")[0];
+
+
+        await cloudinary.uploader.destroy(
+          publicId
+        );
+
+
+      }catch(err){
+
+        console.log(
+          "Cloudinary delete failed"
+        );
+
       }
+
     }
+
+
 
     await testimonial.deleteOne();
 
+
+
     res.status(200).json({
-      success: true,
+      success:true,
       message:
-        "Testimonial deleted successfully.",
+      "Testimonial deleted successfully.",
     });
-  } catch (error) {
+
+
+
+  } catch(error:any){
+
+
     console.error(error);
 
+
     res.status(500).json({
-      success: false,
+      success:false,
       message:
+        error?.message ||
         "Failed to delete testimonial.",
     });
+
+
   }
+
 };
+
+
+
 
 // ===============================
 // Toggle Status
 // ===============================
 export const toggleTestimonialStatus =
-  async (
-    req: Request,
-    res: Response
-  ) => {
-    try {
-      const testimonial =
-        await Testimonial.findById(
-          req.params.id
-        );
+async (
+ req:Request,
+ res:Response
+)=>{
 
-      if (!testimonial) {
-        return res.status(404).json({
-          success: false,
-          message:
-            "Testimonial not found.",
-        });
-      }
+try{
 
-      testimonial.isActive =
-        !testimonial.isActive;
 
-      await testimonial.save();
+ const testimonial =
+ await Testimonial.findById(
+  req.params.id
+ );
 
-      res.status(200).json({
-        success: true,
-        testimonial,
-      });
-    } catch (error) {
-      console.error(error);
 
-      res.status(500).json({
-        success: false,
-        message:
-          "Failed to update status.",
-      });
-    }
-  };
+ if(!testimonial){
+
+  return res.status(404).json({
+   success:false,
+   message:
+   "Testimonial not found.",
+  });
+
+ }
+
+
+ testimonial.isActive =
+ !testimonial.isActive;
+
+
+ await testimonial.save();
+
+
+
+ res.status(200).json({
+
+  success:true,
+
+  message:
+  "Status updated successfully.",
+
+  testimonial,
+
+ });
+
+
+}catch(error:any){
+
+
+ console.error(error);
+
+
+ res.status(500).json({
+
+  success:false,
+
+  message:
+  error?.message ||
+  "Failed to update status.",
+
+ });
+
+
+}
+
+};

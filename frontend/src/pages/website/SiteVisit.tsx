@@ -201,13 +201,14 @@ export default function SiteVisit() {
 
               <div className="space-y-3 text-gray-600">
 
-                <p>📞 +91 98765 43210</p>
+                <p>📞 +91 9207979677 / +91 9447479677</p>
 
-                <p>✉ info@suryanikunjam.com</p>
+                <p>✉ amskaimal@gmail.com</p>
 
                 <p>
-                  📍 West Kodikulam,
-                  Thodupuzha, Kerala
+                  📍 Surya Nikunjam Community
+                  West Kodikulam, Thodupuzha, Idukki, Kerala
+
                 </p>
 
               </div>

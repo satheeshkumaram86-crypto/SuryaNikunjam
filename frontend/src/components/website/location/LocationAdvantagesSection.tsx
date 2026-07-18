@@ -108,52 +108,65 @@ export default function LocationAdvantagesSection() {
 
   return (
     <section className="pt-32 py-20 bg-gray-50">
+<div className="max-w-7xl mx-auto px-4">
 
-      <div className="max-w-7xl mx-auto px-4">
+  {/* Heading */}
 
-        {/* Heading */}
+  <div className="text-center mb-16">
 
-        {/* Content */}
+    <span className="inline-flex items-center gap-2 text-green-700 font-semibold uppercase tracking-wider">
+      <MapPin size={18} />
+      Prime Location
+    </span>
 
-<div className="grid lg:grid-cols-2 gap-12 items-center">
+    <h2 className="text-4xl font-bold mt-4 text-gray-900">
+      Location Advantages
+    </h2>
 
-  {/* Left Image */}
+    <div className="w-24 h-1 bg-green-600 mx-auto mt-5 rounded-full"></div>
 
-  <div className="relative">
-
-    {/*<img
-      src="/location-map.jpg"
-      alt="Location"
-      className="rounded-3xl shadow-xl w-full h-[450px] object-cover"
-    />*/}
-
-    <div className="absolute bottom-6 left-6 bg-white rounded-xl shadow-lg px-6 py-4">
-
-      <div className="flex items-center gap-2">
-
-        <MapPin
-          size={22}
-          className="text-green-600"
-        />
-
-        <div>
-
-          <h4 className="font-bold text-gray-800">
-            Prime Location
-          </h4>
-
-          <p className="text-gray-500 text-sm">
-            West Kodikulam, Thodupuzha
-          </p>
-
-        </div>
-
-      </div>
-
-    </div>
+    <p className="mt-6 max-w-3xl mx-auto text-lg text-gray-600">
+      Surya Nikunjam enjoys a strategic location with easy access to schools,
+      hospitals, shopping centres, banks and other essential facilities.
+    </p>
 
   </div>
 
+  {/* Content */}
+
+  <div className="grid lg:grid-cols-2 gap-12 items-start">
+
+  {/* Left Image */}
+
+  {/* Left Map */}
+
+<div>
+
+  <div className="rounded-3xl overflow-hidden shadow-xl h-[500px]">
+    <iframe
+      title="Surya Nikunjam Location"
+      src="https://www.google.com/maps?q=West+Kodikulam+Thodupuzha+Kerala&output=embed"
+      width="100%"
+      height="100%"
+      style={{ border: 0 }}
+      loading="lazy"
+      allowFullScreen
+      referrerPolicy="no-referrer-when-downgrade"
+    />
+  </div>
+
+  <div className="mt-5 flex justify-center">
+   <a
+  href="https://maps.google.com/?q=West+Kodikulam+Thodupuzha+Kerala"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="inline-flex items-center rounded-xl bg-green-600 px-6 py-3 text-white font-semibold hover:bg-green-700 transition"
+>
+  <MapPin size={18} className="mr-2" />
+  Open in Google Maps
+</a>
+  </div>
+</div>
   {/* Right */}
 
   <div>

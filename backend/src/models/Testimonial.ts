@@ -33,7 +33,7 @@ const testimonialSchema = new Schema(
 
     image: {
       type: String,
-      required: true,
+      default: "",
     },
 
     rating: {

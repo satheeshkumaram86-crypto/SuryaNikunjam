@@ -13,9 +13,6 @@ export default function EventTable({
   onDelete,
   onToggle,
 }: EventTableProps) {
-  const API_URL =
-    import.meta.env.VITE_IMG_URL ||
-    "http://localhost:5000";
 
   if (events.length === 0) {
     return (
@@ -32,9 +29,9 @@ export default function EventTable({
       <table className="min-w-full">
         <thead className="bg-gray-100">
           <tr>
-            <th className="px-4 py-3 text-left">
+            {/*<th className="px-4 py-3 text-left">
               Image
-            </th>
+            </th>*/}
 
             <th className="px-4 py-3 text-left">
               Title
@@ -73,13 +70,13 @@ export default function EventTable({
               className="border-t hover:bg-gray-50"
             >
               {/* Image */}
-              <td className="px-4 py-3">
+              {/*<td className="px-4 py-3">
                 <img
-                  src={`${API_URL}${event.image}`}
+                  src={event.image}
                   alt={event.title}
                   className="w-28 h-16 rounded-lg border object-cover"
                 />
-              </td>
+              </td>*/}
 
               {/* Title */}
               <td className="px-4 py-3 font-medium">

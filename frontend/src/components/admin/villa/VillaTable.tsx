@@ -13,9 +13,6 @@ export default function VillaTable({
   onDelete,
   onToggle,
 }: VillaTableProps) {
-  const API_URL =
-    import.meta.env.VITE_IMG_URL ||
-    "http://localhost:5000";
 
   if (villas.length === 0) {
     return (
@@ -74,13 +71,19 @@ export default function VillaTable({
             >
               {/* Image */}
 
-              <td className="px-4 py-3">
-                <img
-                  src={`${API_URL}${villa.image}`}
-                  alt={villa.title}
-                  className="w-28 h-20 object-cover rounded-lg border"
-                />
-              </td>
+             <td className="px-4 py-3">
+  {villa.image ? (
+    <img
+      src={villa.image}
+      alt={villa.title}
+      className="w-28 h-20 object-cover rounded-lg border"
+    />
+  ) : (
+    <div className="w-28 h-20 flex items-center justify-center rounded-lg border bg-gray-100 text-xs text-gray-500">
+      No Image
+    </div>
+  )}
+</td>
 
               {/* Title */}
 

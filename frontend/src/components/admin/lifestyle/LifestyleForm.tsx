@@ -15,7 +15,6 @@ export default function LifestyleForm({
   loading,
   submitText = "Save Lifestyle",
 }: LifestyleFormProps) {
-  const API_URL = import.meta.env.VITE_IMG_URL || "http://localhost:5000";
 
   const [preview, setPreview] = useState("");
 
@@ -29,19 +28,19 @@ export default function LifestyleForm({
   });
 
   useEffect(() => {
-    if (initialData) {
-      setForm({
-        title: initialData.title || "",
-        description: initialData.description || "",
-        order: initialData.order || 1,
-        isActive: initialData.isActive,
-      });
+  if (initialData) {
+    setForm({
+      title: initialData.title || "",
+      description: initialData.description || "",
+      order: initialData.order || 1,
+      isActive: initialData.isActive,
+    });
 
-      if (initialData.image) {
-        setPreview(`${API_URL}${initialData.image}`);
-      }
+    if (initialData.image) {
+      setPreview(initialData.image);
     }
-  }, [initialData, API_URL]);
+  }
+}, [initialData]);
 
   useEffect(() => {
     return () => {
@@ -147,7 +146,7 @@ export default function LifestyleForm({
       {/* Description */}
       <div>
         <label className="block mb-2 font-medium">
-          Description *
+          Description 
         </label>
 
         <textarea
@@ -156,7 +155,6 @@ export default function LifestyleForm({
           value={form.description}
           onChange={changeHandler}
           maxLength={500}
-          required
           className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none"
         />
       </div>

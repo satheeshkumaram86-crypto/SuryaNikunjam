@@ -1,4 +1,6 @@
-import { NavLink, Link } from "react-router-dom";
+import { useState } from "react";
+import { NavLink } from "react-router-dom";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface MenuItem {
   name: string;
@@ -9,99 +11,101 @@ interface MobileMenuProps {
   open: boolean;
   onClose: () => void;
   menus: MenuItem[];
+  moreMenus: MenuItem[];
 }
 
 export default function MobileMenu({
   open,
   onClose,
   menus,
+  moreMenus,
 }: MobileMenuProps) {
+  const [moreOpen, setMoreOpen] =
+    useState(false);
+
   return (
-    <>
-      {/* Overlay */}
+    <div
+      className={`fixed top-[92px] left-0 w-full bg-white shadow-lg transition-all duration-300 z-40 overflow-hidden ${
+        open
+          ? "max-h-screen opacity-100"
+          : "max-h-0 opacity-0"
+      }`}
+    >
+      <nav className="flex flex-col px-6 py-4">
 
-      <div
-        onClick={onClose}
-        className={`fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 lg:hidden ${
-          open
-            ? "opacity-100 visible"
-            : "opacity-0 invisible"
-        }`}
-      />
+        {/* Main Menus */}
 
-      {/* Sidebar */}
+        {menus.map((menu) => (
+          <NavLink
+            key={menu.path}
+            to={menu.path}
+            onClick={onClose}
+            className={({ isActive }) =>
+              `py-3 border-b transition ${
+                isActive
+                  ? "text-green-600 font-semibold"
+                  : "text-gray-700 hover:text-green-600"
+              }`
+            }
+          >
+            {menu.name}
+          </NavLink>
+        ))}
 
-      <aside
-        className={`fixed top-0 right-0 z-50 h-full w-80 max-w-[85%] bg-white shadow-xl transition-transform duration-300 lg:hidden ${
-          open
-            ? "translate-x-0"
-            : "translate-x-full"
-        }`}
-      >
-        {/* Header */}
+        {/* More */}
 
-        <div className="flex items-center justify-between border-b px-6 py-5">
+        <button
+          onClick={() =>
+            setMoreOpen(!moreOpen)
+          }
+          className="flex items-center justify-between py-3 border-b text-gray-700 hover:text-green-600 transition"
+        >
+          <span>More</span>
 
-          <div>
+          {moreOpen ? (
+            <ChevronUp size={18} />
+          ) : (
+            <ChevronDown size={18} />
+          )}
+        </button>
 
-            <h2 className="text-xl font-bold text-green-700">
-              Surya Nikunjam
-            </h2>
+        {moreOpen && (
+          <div className="pl-4">
 
-            <p className="text-sm text-gray-500">
-              Community Living
-            </p>
+            {moreMenus.map((menu) => (
+              <NavLink
+                key={menu.path}
+                to={menu.path}
+                onClick={() => {
+                  onClose();
+                  setMoreOpen(false);
+                }}
+                className={({ isActive }) =>
+                  `block py-3 border-b transition ${
+                    isActive
+                      ? "text-green-600 font-semibold"
+                      : "text-gray-600 hover:text-green-600"
+                  }`
+                }
+              >
+                {menu.name}
+              </NavLink>
+            ))}
 
           </div>
+        )}
 
-          <button
-            onClick={onClose}
-            className="text-3xl text-gray-600 hover:text-green-600"
-          >
-            ×
-          </button>
+        {/* Book Site Visit */}
 
-        </div>
+        <NavLink
+          to="/site-visit"
+          onClick={onClose}
+          className="mt-6 rounded-xl bg-green-600 py-3 text-center font-semibold text-white hover:bg-green-700 transition"
+        >
+          Book Site Visit
+        </NavLink>
 
-        {/* Navigation */}
-
-        <nav className="flex flex-col p-6">
-
-          {menus.map((menu) => (
-            <NavLink
-              key={menu.path}
-              to={menu.path}
-              end={menu.path === "/"}
-              onClick={onClose}
-              className={({ isActive }) =>
-                `rounded-lg px-4 py-3 text-lg font-medium transition mb-2 ${
-                  isActive
-                    ? "bg-green-600 text-white"
-                    : "text-gray-700 hover:bg-green-50 hover:text-green-600"
-                }`
-              }
-            >
-              {menu.name}
-            </NavLink>
-          ))}
-
-        </nav>
-
-        {/* CTA */}
-
-        <div className="px-6 mt-auto pb-8">
-
-          <Link
-            to="/site-visit"
-            onClick={onClose}
-            className="block w-full rounded-lg bg-green-600 px-4 py-3 text-center font-semibold text-white transition hover:bg-green-700"
-          >
-            Book Site Visit
-          </Link>
-
-        </div>
-
-      </aside>
-    </>
+      </nav>
+    </div>
   );
 }

@@ -13,7 +13,6 @@ export default function AmenityTable({
   onDelete,
   onToggle,
 }: AmenityTableProps) {
-  //const API_URL =import.meta.env.VITE_IMG_URL || "http://localhost:5000";
 
   if (amenities.length === 0) {
     return (
@@ -65,7 +64,7 @@ export default function AmenityTable({
               {/* Image */}
               {/*<td className="px-4 py-3">
                 <img
-                  src={`${API_URL}${amenity.image}`}
+                  src={amenity.image}
                   alt={amenity.title}
                   className="w-28 h-16 rounded-lg border object-cover"
                 />
@@ -110,13 +109,14 @@ export default function AmenityTable({
               <td className="px-4 py-3">
                 <div className="flex justify-center gap-4">
                   <Link
+                  aria-label="Edit Amenity"
                     to={`/admin/amenities/edit/${amenity._id}`}
                     className="text-blue-600 hover:text-blue-800"
                   >
                     <Pencil size={18} />
                   </Link>
 
-                  <button
+                  <button aria-label="Delete Amenity"
                     onClick={() =>
                       onDelete(amenity._id!)
                     }

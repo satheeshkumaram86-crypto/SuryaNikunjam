@@ -28,9 +28,6 @@ export default function VillaDetailsSection() {
 
   const [loading, setLoading] = useState(true);
 
-  const API_URL =
-    import.meta.env.VITE_IMG_URL ||
-    "http://localhost:5000";
 
   useEffect(() => {
     if (id) {
@@ -114,7 +111,7 @@ export default function VillaDetailsSection() {
             <div>
 
               <img
-                src={`${API_URL}${villa.image}`}
+                src={villa.image}
                 alt={villa.title}
                 className="w-full h-full min-h-[500px] object-cover"
               />

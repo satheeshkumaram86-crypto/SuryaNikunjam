@@ -5,43 +5,60 @@ import AmenityCard from "./AmenityCard";
 import { getAmenities } from "../../../services/amenityService";
 
 import type { Amenity } from "../../../types/amenity";
+import { Link } from "react-router-dom";
 
-export default function AmenitySection() {
+interface AmenitySectionProps {
+  limit?: number;
+  showViewAll?: boolean;
+}
+export default function AmenitySection({
+  limit,
+  showViewAll = false,
+}: AmenitySectionProps) {
   const [amenities, setAmenities] = useState<Amenity[]>([]);
 
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadAmenities();
-  }, []);
 
   const loadAmenities = async () => {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const response = await getAmenities();
+    const response = await getAmenities();
 
-      if (response.success) {
-        const activeAmenities = (response.amenities || [])
-          .filter(
-            (amenity: Amenity) => amenity.isActive
-          )
-          .sort(
-            (a: Amenity, b: Amenity) =>
-              a.order - b.order
-          );
+    if (response.success) {
+      const amenityData = Array.isArray(response.amenities)
+        ? response.amenities
+        : Array.isArray(response.data)
+        ? response.data
+        : [];
 
-        setAmenities(activeAmenities);
-      }
-    } catch (error) {
-      console.error(
-        "Failed to load amenities",
-        error
+      const activeAmenities = amenityData
+        .filter((amenity: Amenity) => amenity.isActive)
+        .sort(
+          (a: Amenity, b: Amenity) =>
+            a.order - b.order
+        );
+
+      setAmenities(
+        limit
+          ? activeAmenities.slice(0, limit)
+          : activeAmenities
       );
-    } finally {
-      setLoading(false);
+    } else {
+      setAmenities([]);
     }
-  };
+  } catch (error) {
+    console.error(error);
+    setAmenities([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
+   useEffect(() => {
+  loadAmenities();
+}, [limit]);
 
   if (loading) {
     return (
@@ -105,6 +122,16 @@ export default function AmenitySection() {
         )}
 
       </div>
+      {showViewAll && amenities.length > 0 && (
+  <div className="mt-10 text-center">
+    <Link
+      to="/amenities"
+      className="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition"
+    >
+      View All Amenities
+    </Link>
+  </div>
+)}
 
     </section>
   );

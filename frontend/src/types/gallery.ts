@@ -5,7 +5,16 @@ export interface Gallery {
 
   category: string;
 
+  mediaType:
+    | "image"
+    | "video"
+    | "youtube";
+
   image: string;
+
+  video: string;
+
+  youtubeUrl: string;
 
   order: number;
 

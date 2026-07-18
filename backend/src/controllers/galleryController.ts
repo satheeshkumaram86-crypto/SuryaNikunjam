@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import Gallery from "../models/Gallery";
-import fs from "fs";
-import path from "path";
+import cloudinary from "../config/cloudinary";
+import { uploadToCloudinary } from "../utils/uploadToCloudinary";
+
+/* ---------------- GET ALL ---------------- */
 
 export const getGallery = async (
   req: Request,
@@ -16,13 +18,17 @@ export const getGallery = async (
       success: true,
       gallery,
     });
-  } catch {
+  } catch (error) {
+    console.error(error);
+
     res.status(500).json({
       success: false,
       message: "Failed to fetch gallery.",
     });
   }
 };
+
+/* ---------------- GET BY ID ---------------- */
 
 export const getGalleryById = async (
   req: Request,
@@ -44,74 +50,253 @@ export const getGalleryById = async (
       success: true,
       gallery,
     });
-  } catch {
+  } catch (error) {
+    console.error(error);
+
     res.status(500).json({
       success: false,
     });
   }
 };
+
+/* ---------------- DELETE CLOUDINARY FILE ---------------- */
+
+const deleteCloudinaryFile = async (
+  url: string,
+  resourceType: "image" | "video"
+) => {
+  if (!url) return;
+
+  try {
+    const uploadIndex = url.indexOf("/upload/");
+
+    if (uploadIndex === -1) return;
+
+    let publicId = url.substring(uploadIndex + 8);
+
+    publicId = publicId.replace(/^v\d+\//, "");
+
+    publicId = publicId.replace(/\.[^/.]+$/, "");
+
+    await cloudinary.uploader.destroy(publicId, {
+      resource_type: resourceType,
+    });
+
+    console.log("Deleted:", publicId);
+  } catch (err) {
+    console.error("Cloudinary Delete Error:", err);
+  }
+};
+
+/* ---------------- CREATE ---------------- */
 
 export const createGallery = async (
   req: Request,
   res: Response
 ) => {
   try {
-    const gallery =
-      await Gallery.create({
-        ...req.body,
-        image: req.file
-          ? `/uploads/gallery/${req.file.filename}`
-          : "",
+    const mediaType = req.body.mediaType || "image";
+
+    // Validation
+    if (
+      (mediaType === "image" || mediaType === "video") &&
+      !req.file
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select a file.",
       });
+    }
+
+    if (
+      mediaType === "youtube" &&
+      !req.body.youtubeUrl
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a YouTube URL.",
+      });
+    }
+
+    let fileUrl = "";
+
+    if (
+      req.file &&
+      (mediaType === "image" ||
+        mediaType === "video")
+    ) {
+      const uploaded =
+        await uploadToCloudinary(req.file);
+
+      fileUrl = uploaded.secure_url;
+    }
+
+    const gallery = await Gallery.create({
+      title: req.body.title,
+      category: req.body.category,
+      mediaType,
+
+      image:
+        mediaType === "image"
+          ? fileUrl
+          : "",
+
+      video:
+        mediaType === "video"
+          ? fileUrl
+          : "",
+
+      youtubeUrl:
+        mediaType === "youtube"
+          ? req.body.youtubeUrl
+          : "",
+
+      order: Number(req.body.order),
+
+      isActive:
+        req.body.isActive === "true" ||
+        req.body.isActive === true,
+    });
 
     res.status(201).json({
       success: true,
       gallery,
     });
-  } catch {
-    res.status(500).json({
+
+  } catch (error: any) {
+
+    console.error(error);
+
+    if (error.http_code === 413) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Maximum upload size is 100 MB.",
+      });
+    }
+
+    return res.status(500).json({
       success: false,
-      message: "Failed to create gallery.",
+      message:
+        error.message ||
+        "Failed to create gallery.",
     });
   }
 };
+
+/* ---------------- UPDATE ---------------- */
 
 export const updateGallery = async (
   req: Request,
   res: Response
 ) => {
   try {
+
     const gallery =
       await Gallery.findById(req.params.id);
 
     if (!gallery) {
       return res.status(404).json({
         success: false,
+        message: "Gallery not found.",
       });
     }
 
-    if (req.file) {
-      if (gallery.image) {
-        const oldImage = path.join(
-          __dirname,
-          "../../",
-          gallery.image
-        );
+    const mediaType = req.body.mediaType;
 
-        if (fs.existsSync(oldImage)) {
-          fs.unlinkSync(oldImage);
-        }
-      }
-
-      gallery.image = `/uploads/gallery/${req.file.filename}`;
+    // Validation
+    if (
+      mediaType === "youtube" &&
+      !req.body.youtubeUrl
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Please enter a YouTube URL.",
+      });
     }
 
     gallery.title = req.body.title;
-    gallery.category =
-      req.body.category;
-    gallery.order = req.body.order;
+    gallery.category = req.body.category;
+    gallery.order = Number(req.body.order);
+
     gallery.isActive =
-      req.body.isActive;
+      req.body.isActive === "true" ||
+      req.body.isActive === true;
+
+    const oldImage = gallery.image;
+    const oldVideo = gallery.video;
+
+    gallery.mediaType = mediaType;
+
+    /* ---------------- Switch to YouTube ---------------- */
+
+    if (mediaType === "youtube") {
+
+      if (oldImage) {
+        await deleteCloudinaryFile(
+          oldImage,
+          "image"
+        );
+      }
+
+      if (oldVideo) {
+        await deleteCloudinaryFile(
+          oldVideo,
+          "video"
+        );
+      }
+
+      gallery.image = "";
+      gallery.video = "";
+      gallery.youtubeUrl =
+        req.body.youtubeUrl;
+    }
+
+    /* ---------------- Upload New Image / Video ---------------- */
+
+    if (
+      req.file &&
+      (mediaType === "image" ||
+        mediaType === "video")
+    ) {
+
+      if (oldImage) {
+        await deleteCloudinaryFile(
+          oldImage,
+          "image"
+        );
+      }
+
+      if (oldVideo) {
+        await deleteCloudinaryFile(
+          oldVideo,
+          "video"
+        );
+      }
+
+      const uploaded =
+        await uploadToCloudinary(
+          req.file
+        );
+
+      gallery.youtubeUrl = "";
+
+      if (mediaType === "image") {
+        gallery.image =
+          uploaded.secure_url;
+        gallery.video = "";
+      }
+
+      if (mediaType === "video") {
+        gallery.video =
+          uploaded.secure_url;
+        gallery.image = "";
+      }
+    }
+
+    // If no new file is uploaded,
+    // existing image/video remains unchanged.
 
     await gallery.save();
 
@@ -119,52 +304,95 @@ export const updateGallery = async (
       success: true,
       gallery,
     });
-  } catch {
-    res.status(500).json({
+
+  } catch (error: any) {
+
+    console.error(error);
+
+    if (error.http_code === 413) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Maximum upload size is 100 MB.",
+      });
+    }
+
+    return res.status(500).json({
       success: false,
+      message:
+        error.message ||
+        "Failed to update gallery.",
     });
   }
 };
+/* ---------------- DELETE ---------------- */
 
 export const deleteGallery = async (
   req: Request,
   res: Response
 ) => {
   try {
-    const gallery =
-      await Gallery.findById(req.params.id);
+    const gallery = await Gallery.findById(req.params.id);
 
     if (!gallery) {
       return res.status(404).json({
         success: false,
+        message: "Gallery not found.",
       });
     }
 
+    // Delete image from Cloudinary
     if (gallery.image) {
-      const imagePath = path.join(
-        __dirname,
-        "../../",
-        gallery.image
-      );
-
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
+      try {
+        await deleteCloudinaryFile(
+          gallery.image,
+          "image"
+        );
+      } catch (err) {
+        console.error(
+          "Failed to delete image from Cloudinary:",
+          err
+        );
       }
     }
 
+    // Delete video from Cloudinary
+    if (gallery.video) {
+      try {
+        await deleteCloudinaryFile(
+          gallery.video,
+          "video"
+        );
+      } catch (err) {
+        console.error(
+          "Failed to delete video from Cloudinary:",
+          err
+        );
+      }
+    }
+
+    // Delete MongoDB document
     await gallery.deleteOne();
 
-    res.json({
+    return res.status(200).json({
       success: true,
-      message:
-        "Gallery deleted successfully.",
+      message: "Gallery deleted successfully.",
     });
-  } catch {
-    res.status(500).json({
+
+  } catch (error: any) {
+    console.error("DELETE GALLERY ERROR:");
+    console.error(error);
+
+    return res.status(500).json({
       success: false,
+      message:
+        error.message ||
+        "Failed to delete gallery.",
     });
   }
 };
+
+/* ---------------- TOGGLE STATUS ---------------- */
 
 export const toggleGalleryStatus =
   async (
@@ -192,7 +420,9 @@ export const toggleGalleryStatus =
         success: true,
         gallery,
       });
-    } catch {
+    } catch (error) {
+      console.error(error);
+
       res.status(500).json({
         success: false,
       });

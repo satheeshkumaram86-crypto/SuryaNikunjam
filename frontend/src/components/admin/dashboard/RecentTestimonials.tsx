@@ -8,9 +8,6 @@ export default function RecentTestimonials({
   testimonials,
 }: Props) {
 
-  const API_URL =
-    import.meta.env.VITE_IMG_URL ||
-    "http://localhost:5000";
 
   return (
     <div className="bg-white rounded-xl shadow p-6">
@@ -34,7 +31,7 @@ export default function RecentTestimonials({
               >
 
                 <img
-                  src={`${API_URL}${testimonial.image}`}
+                  src={testimonial.image}
                   alt={testimonial.name}
                   className="w-14 h-14 rounded-full object-cover"
                 />

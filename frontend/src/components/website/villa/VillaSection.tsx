@@ -5,17 +5,23 @@ import VillaCard from "./VillaCard";
 import { getPublicVillas } from "../../../services/villaService";
 
 import type { Villa } from "../../../types/villa";
+import { Link } from "react-router-dom";
 
-export default function VillaSection() {
+interface VillaSectionProps {
+  limit?: number;
+  showViewAll?: boolean;
+}
+
+export default function VillaSection({
+  limit,
+  showViewAll = false,
+}: VillaSectionProps) {
   const [villas, setVillas] =
     useState<Villa[]>([]);
 
   const [loading, setLoading] =
     useState(true);
 
-  useEffect(() => {
-    loadVillas();
-  }, []);
 
   const loadVillas = async () => {
     try {
@@ -34,7 +40,11 @@ export default function VillaSection() {
                 a.order - b.order
             );
 
-        setVillas(activeVillas);
+        setVillas(
+  limit
+    ? activeVillas.slice(0, limit)
+    : activeVillas
+);
       }
     } catch (error) {
       console.error(
@@ -45,6 +55,11 @@ export default function VillaSection() {
       setLoading(false);
     }
   };
+
+  
+ useEffect(() => {
+  loadVillas();
+}, [limit]);
 
   if (loading) {
     return (
@@ -139,6 +154,16 @@ export default function VillaSection() {
         )}
 
       </div>
+      {showViewAll && villas.length > 0 && (
+  <div className="mt-10 text-center">
+    <Link
+      to="/villas"
+      className="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition"
+    >
+      View All Villas
+    </Link>
+  </div>
+)}
 
     </section>
   );

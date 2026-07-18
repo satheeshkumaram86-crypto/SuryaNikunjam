@@ -10,25 +10,22 @@ interface EventCardProps {
 export default function EventCard({
   event,
 }: EventCardProps) {
-  const API_URL =
-    import.meta.env.VITE_IMG_URL ||
-    "http://localhost:5000";
 
   return (
     <div className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300">
 
       {/* Image */}
-
+{event.image && (
       <div className="overflow-hidden">
 
         <img
-          src={`${API_URL}${event.image}`}
+          src={event.image}
           alt={event.title}
           className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
         />
 
       </div>
-
+)}
       {/* Content */}
 
       <div className="p-6">

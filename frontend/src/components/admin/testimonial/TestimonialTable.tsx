@@ -14,9 +14,6 @@ export default function TestimonialTable({
   onDelete,
   onToggle,
 }: TestimonialTableProps) {
-  const API_URL =
-    import.meta.env.VITE_IMG_URL ||
-    "http://localhost:5000";
 
   if (testimonials.length === 0) {
     return (
@@ -33,9 +30,9 @@ export default function TestimonialTable({
       <table className="min-w-full">
         <thead className="bg-gray-100">
           <tr>
-            <th className="px-4 py-3 text-left">
+            {/*<th className="px-4 py-3 text-left">
               Photo
-            </th>
+            </th>*/}
 
             <th className="px-4 py-3 text-left">
               Resident
@@ -74,13 +71,13 @@ export default function TestimonialTable({
               className="border-t hover:bg-gray-50"
             >
               {/* Photo */}
-              <td className="px-4 py-3">
+              {/*<td className="px-4 py-3">
                 <img
-                  src={`${API_URL}${testimonial.image}`}
+                  src={testimonial.image}
                   alt={testimonial.name}
                   className="w-16 h-16 rounded-full border object-cover"
                 />
-              </td>
+              </td>*/}
 
               {/* Name */}
               <td className="px-4 py-3 font-medium">

@@ -17,9 +17,7 @@ interface VillaCardProps {
 export default function VillaCard({
   villa,
 }: VillaCardProps) {
-  const API_URL =
-    import.meta.env.VITE_IMG_URL ||
-    "http://localhost:5000";
+
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition duration-300">
@@ -29,7 +27,7 @@ export default function VillaCard({
       <div className="overflow-hidden">
 
         <img
-          src={`${API_URL}${villa.image}`}
+          src={villa.image}
           alt={villa.title}
           className="w-full h-72 object-cover hover:scale-105 transition duration-500"
         />

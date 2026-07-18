@@ -16,9 +16,6 @@ export default function TestimonialForm({
   loading,
   submitText = "Save Testimonial",
 }: TestimonialFormProps) {
-  const API_URL =
-    import.meta.env.VITE_IMG_URL ||
-    "http://localhost:5000";
 
   const [preview, setPreview] = useState("");
 
@@ -52,14 +49,11 @@ export default function TestimonialForm({
         isActive:
           initialData.isActive ?? true,
       });
-
-      setPreview(
-        initialData.image
-          ? `${API_URL}${initialData.image}`
-          : ""
-      );
+    if (initialData.image) {
+      setPreview(initialData.image);
     }
-  }, [initialData, API_URL]);
+    }
+  }, [initialData]);
 
   useEffect(() => {
     return () => {
@@ -107,7 +101,7 @@ export default function TestimonialForm({
   ) => {
     e.preventDefault();
 
-    if (!image && !initialData?.image) {
+    /*if (!image && !initialData?.image) {
       Swal.fire({
         icon: "warning",
         title:
@@ -115,7 +109,7 @@ export default function TestimonialForm({
       });
 
       return;
-    }
+    }*/
 
     const formData = new FormData();
 

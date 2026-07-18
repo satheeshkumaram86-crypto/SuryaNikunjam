@@ -41,11 +41,9 @@ export default function BannerForm({
         isActive: initialData.isActive,
       });
 
-      setPreview(
-        initialData.image
-          ? `http://localhost:5000${initialData.image}`
-          : ""
-      );
+       if (initialData.image) {
+  setPreview(initialData.image);
+}
     }
   }, [initialData]);
 useEffect(() => {

@@ -1,9 +1,18 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, {
+  Document,
+  Schema,
+} from "mongoose";
 
 export interface IGallery extends Document {
   title: string;
   category: string;
-  image: string;
+
+  mediaType: "image" | "video" | "youtube";
+
+  image?: string;
+  video?: string;
+  youtubeUrl?: string;
+
   order: number;
   isActive: boolean;
 }
@@ -21,9 +30,32 @@ const gallerySchema = new Schema(
       default: "",
     },
 
+    mediaType: {
+      type: String,
+      enum: [
+        "image",
+        "video",
+        "youtube",
+      ],
+      default: "image",
+    },
+
+    // Image Upload
     image: {
       type: String,
-      required: true,
+      default: "",
+    },
+
+    // Uploaded Video
+    video: {
+      type: String,
+      default: "",
+    },
+
+    // YouTube Link
+    youtubeUrl: {
+      type: String,
+      default: "",
     },
 
     order: {

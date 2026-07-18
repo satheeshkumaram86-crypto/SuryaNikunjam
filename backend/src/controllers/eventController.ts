@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import Event from "../models/Event";
-import fs from "fs";
-import path from "path";
+import cloudinary from "../config/cloudinary";
 
 export const getEvents = async (
   req: Request,
@@ -57,12 +56,25 @@ export const createEvent = async (
   res: Response
 ) => {
   try {
-    const event = await Event.create({
-      ...req.body,
-      image: req.file
-        ? `/uploads/events/${req.file.filename}`
-        : "",
-    });
+    let image = "";
+
+if (req.file) {
+  const file = req.file as Express.Multer.File;
+
+  const result = await cloudinary.uploader.upload(
+    file.path,
+    {
+      folder: "surya-nikunjam/events",
+    }
+  );
+
+  image = result.secure_url;
+}
+
+const event = await Event.create({
+  ...req.body,
+  image,
+});
 
     res.status(201).json({
       success: true,
@@ -92,20 +104,32 @@ export const updateEvent = async (
     }
 
     if (req.file) {
-      if (event.image) {
-        const oldImage = path.join(
-          __dirname,
-          "../../",
-          event.image
-        );
 
-        if (fs.existsSync(oldImage)) {
-          fs.unlinkSync(oldImage);
-        }
-      }
+  // Delete old Cloudinary image
+  if (event.image) {
+    try {
+      const parts = event.image.split("/");
+      const filename = parts[parts.length - 1];
 
-      event.image = `/uploads/events/${req.file.filename}`;
+      const publicId =
+        "surya-nikunjam/events/" +
+        filename.split(".")[0];
+
+      await cloudinary.uploader.destroy(publicId);
+    } catch (err) {
+      console.log("Old image delete failed");
     }
+  }
+
+  const file = req.file as Express.Multer.File;
+
+  const result =
+    await cloudinary.uploader.upload(file.path, {
+      folder: "surya-nikunjam/events",
+    });
+
+  event.image = result.secure_url;
+}
 
     event.title = req.body.title;
     event.shortDescription =
@@ -146,18 +170,27 @@ export const deleteEvent = async (
     if (!event) {
       return res.status(404).json({
         success: false,
+        message: "Event not found.",
       });
     }
 
     if (event.image) {
-      const imagePath = path.join(
-        __dirname,
-        "../../",
-        event.image
-      );
+      try {
+        const parts = event.image.split("/");
+        const filename =
+          parts[parts.length - 1];
 
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
+        const publicId =
+          "surya-nikunjam/events/" +
+          filename.split(".")[0];
+
+        await cloudinary.uploader.destroy(
+          publicId
+        );
+      } catch (err) {
+        console.log(
+          "Cloudinary delete failed"
+        );
       }
     }
 
@@ -165,11 +198,16 @@ export const deleteEvent = async (
 
     res.json({
       success: true,
-      message: "Event deleted successfully.",
+      message:
+        "Event deleted successfully.",
     });
-  } catch {
+  } catch (error) {
+    console.error(error);
+
     res.status(500).json({
       success: false,
+      message:
+        "Failed to delete event.",
     });
   }
 };

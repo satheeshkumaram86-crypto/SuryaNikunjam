@@ -13,7 +13,6 @@ export default function LifestyleTable({
   onDelete,
   onToggle,
 }: LifestyleTableProps) {
-  //const API_URL = import.meta.env.VITE_IMG_URL || "http://localhost:5000";
 
   if (lifestyles.length === 0) {
     return (
@@ -65,7 +64,7 @@ export default function LifestyleTable({
               {/* Image */}
               {/*<td className="px-4 py-3">
                 <img
-                  src={`${API_URL}${lifestyle.image}`}
+                  src={lifestyle.image}
                   alt={lifestyle.title}
                   className="w-28 h-16 rounded-lg border object-cover"
                 />

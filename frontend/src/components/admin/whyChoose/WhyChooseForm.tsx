@@ -36,7 +36,7 @@ export default function WhyChooseForm({
 
       setPreview(
         initialData.icon
-          ? `http://localhost:5000${initialData.icon}`
+          ? initialData.icon
           : ""
       );
     }
@@ -121,13 +121,12 @@ export default function WhyChooseForm({
       {/* Description */}
       <div>
         <label className="block mb-2 font-medium">
-          Description *
+          Description 
         </label>
 
         <textarea
           rows={5}
           name="description"
-          required
           value={form.description}
           onChange={changeHandler}
           className="w-full border rounded-lg p-3"

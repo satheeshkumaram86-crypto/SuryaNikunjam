@@ -16,7 +16,7 @@ export default function WhyChooseCard({
 
         {item.icon ? (
           <img
-            src={`${import.meta.env.VITE_API_URL}${item.icon}`}
+            src={item.icon}
             alt={item.title}
             className="w-full h-full object-cover"
           />

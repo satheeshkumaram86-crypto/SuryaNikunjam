@@ -1,29 +1,24 @@
 import multer from "multer";
-import fs from "fs";
 import path from "path";
+import fs from "fs";
 
-const uploadPath = path.join(
-  __dirname,
-  "../../uploads/gallery"
-);
+// Create temp upload folder if it doesn't exist
+const uploadDir = "uploads/temp";
 
-if (!fs.existsSync(uploadPath)) {
-  fs.mkdirSync(uploadPath, {
-    recursive: true,
-  });
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 const storage = multer.diskStorage({
   destination(req, file, cb) {
-    cb(null, uploadPath);
+    cb(null, uploadDir);
   },
 
   filename(req, file, cb) {
-    const ext = path.extname(
-      file.originalname
-    );
+    const uniqueName =
+      Date.now() + "-" + Math.round(Math.random() * 1e9);
 
-    cb(null, Date.now() + ext);
+    cb(null, uniqueName + path.extname(file.originalname));
   },
 });
 
@@ -32,13 +27,29 @@ const fileFilter: multer.Options["fileFilter"] = (
   file,
   cb
 ) => {
-  if (
-    file.mimetype.startsWith("image/")
-  ) {
+  const allowedTypes = [
+    // Images
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/webp",
+
+    // Videos
+    "video/mp4",
+    "video/webm",
+    "video/ogg",
+    "video/quicktime",
+    "video/x-msvideo",
+    "video/x-matroska",
+  ];
+
+  if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
     cb(
-      new Error("Only image files are allowed.")
+      new Error(
+        "Only JPG, PNG, WEBP images and MP4, WEBM, OGG, MOV, AVI, MKV videos are allowed."
+      )
     );
   }
 };
@@ -46,4 +57,7 @@ const fileFilter: multer.Options["fileFilter"] = (
 export default multer({
   storage,
   fileFilter,
+  limits: {
+    fileSize: 500 * 1024 * 1024, // 500 MB
+  },
 });

@@ -15,7 +15,6 @@ export default function AmenityForm({
   loading,
   submitText = "Save Amenity",
 }: AmenityFormProps) {
-  const API_URL = import.meta.env.VITE_IMG_URL || "http://localhost:5000";
 
   const [preview, setPreview] = useState("");
 
@@ -38,10 +37,10 @@ export default function AmenityForm({
       });
 
       if (initialData.image) {
-        setPreview(`${API_URL}${initialData.image}`);
-      }
+  setPreview(initialData.image);
+}
     }
-  }, [initialData, API_URL]);
+  }, [initialData]);
 
   useEffect(() => {
     return () => {

@@ -13,7 +13,6 @@ export default function WhyChooseTable({
   onDelete,
   onToggle,
 }: WhyChooseTableProps) {
-  //const API_URL =import.meta.env.VITE_IMG_URL || "http://localhost:5000";
 
   if (!items || items.length === 0) {
     return (

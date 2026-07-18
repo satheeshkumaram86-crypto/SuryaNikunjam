@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Amenity from "../models/Amenity";
+import cloudinary from "../config/cloudinary";
 
 export const getAmenities = async (
   req: Request,
@@ -14,12 +15,15 @@ export const getAmenities = async (
       success: true,
       amenities,
     });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch amenities.",
-    });
-  }
+  } catch (error: any) {
+  console.error(error);
+
+  res.status(500).json({
+    success: false,
+    message:
+      error?.message || "Failed to fetch amenities.",
+  });
+}
 };
 
 export const getAmenityById = async (
@@ -42,12 +46,15 @@ export const getAmenityById = async (
       success: true,
       amenity,
     });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch amenity.",
-    });
-  }
+  } catch (error: any) {
+  console.error(error);
+
+  res.status(500).json({
+    success: false,
+    message:
+      error?.message || "Failed to fetch amenity.",
+  });
+}
 };
 
 export const createAmenity = async (
@@ -68,32 +75,43 @@ export const createAmenity = async (
         message: "Amenity image is required.",
       });
     }*/
-   const file = req.file as Express.Multer.File;
-   const image = file
-      ? `/uploads/amenities/${file.filename}`
-      : "";
+   let image = "";
+
+if (req.file) {
+  const file = req.file as Express.Multer.File;
+
+  const result = await cloudinary.uploader.upload(
+    file.path,
+    {
+      folder: "surya-nikunjam/amenities",
+    }
+  );
+
+  image = result.secure_url;
+}
 
     const amenity = await Amenity.create({
-      title,
-      description,
-      image,
-      order,
-      isActive:
-        isActive === "true" || isActive === true,
-    });
+  title,
+  description,
+  image,
+  order,
+  isActive:
+    isActive === "true" ||
+    isActive === true,
+});
 
     res.status(201).json({
       success: true,
       message: "Amenity created successfully.",
       amenity,
     });
-  } catch (error) {
-    console.error(error);
-
+  } catch (error: any) {
     res.status(500).json({
-      success: false,
-      message: "Failed to create amenity.",
-    });
+  success: false,
+  message:
+    error?.message ||
+    "Failed to create amenity.",
+});
   }
 };
 
@@ -121,8 +139,32 @@ export const updateAmenity = async (
       req.body.isActive === true;
 
     if (req.file) {
-      amenity.image = `/uploads/amenities/${req.file.filename}`;
+  // Delete old image
+  if (amenity.image) {
+    try {
+      const parts = amenity.image.split("/");
+      const filename = parts[parts.length - 1];
+      const publicId =
+        "surya-nikunjam/amenities/" +
+        filename.split(".")[0];
+
+      await cloudinary.uploader.destroy(publicId);
+    } catch (err) {
+      console.log("Old image delete failed");
     }
+  }
+
+  const file = req.file as Express.Multer.File;
+
+  const result = await cloudinary.uploader.upload(
+    file.path,
+    {
+      folder: "surya-nikunjam/amenities",
+    }
+  );
+
+  amenity.image = result.secure_url;
+}
 
     await amenity.save();
 
@@ -131,14 +173,15 @@ export const updateAmenity = async (
       message: "Amenity updated successfully.",
       amenity,
     });
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+  console.error(error);
 
-    res.status(500).json({
-      success: false,
-      message: "Failed to update amenity.",
-    });
-  }
+  res.status(500).json({
+    success: false,
+    message:
+      error?.message || "Failed to update amenity.",
+  });
+}
 };
 
 export const deleteAmenity = async (
@@ -157,18 +200,35 @@ export const deleteAmenity = async (
       });
     }
 
-    await amenity.deleteOne();
+    if (amenity.image) {
+  try {
+    const parts = amenity.image.split("/");
+    const filename = parts[parts.length - 1];
+    const publicId =
+      "surya-nikunjam/amenities/" +
+      filename.split(".")[0];
+
+    await cloudinary.uploader.destroy(publicId);
+  } catch (err) {
+    console.log("Cloudinary delete failed");
+  }
+}
+
+await amenity.deleteOne();
 
     res.status(200).json({
       success: true,
       message: "Amenity deleted successfully.",
     });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete amenity.",
-    });
-  }
+  } catch (error: any) {
+  console.error(error);
+
+  res.status(500).json({
+    success: false,
+    message:
+      error?.message || "Failed to delete amenity.",
+  });
+}
 };
 
 export const toggleAmenityStatus = async (
@@ -196,10 +256,13 @@ export const toggleAmenityStatus = async (
       message: "Status updated successfully.",
       amenity,
     });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to update status.",
-    });
-  }
+  } catch (error: any) {
+  console.error(error);
+
+  res.status(500).json({
+    success: false,
+    message:
+      error?.message || "Failed to update status.",
+  });
+}
 };

@@ -7,7 +7,6 @@ interface LifestyleCardProps {
 export default function LifestyleCard({
   lifestyle,
 }: LifestyleCardProps) {
-  //const API_URL = import.meta.env.VITE_IMG_URL || "http://localhost:5000";
 
   return (
     <div className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300">
@@ -15,12 +14,13 @@ export default function LifestyleCard({
       {/* Image */}
 
       <div className="overflow-hidden">
-
-        {/*<img
-          src={`${API_URL}${lifestyle.image}`}
+        {lifestyle.image && (
+        <img
+          src={lifestyle.image}
           alt={lifestyle.title}
           className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
-        />*/}
+        />
+        )}
 
       </div>
 
