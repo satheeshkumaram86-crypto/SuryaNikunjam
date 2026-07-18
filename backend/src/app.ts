@@ -20,8 +20,17 @@ import locationAdvantageRoutes from "./routes/locationAdvantageRoutes";
 
 const app = express();
 
-app.use(cors());
-
+//app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://www.suryanikunjam.com",
+      "https://suryanikunjam.com",
+      "http://localhost:5173",
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 app.use(cookieParser());
