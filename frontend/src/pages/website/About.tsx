@@ -130,7 +130,7 @@ export default function About() {
       <h2 className="text-3xl font-bold mb-8 text-center">
         The Social Challenge
       </h2>
-
+      <p className="text-lg text-gray-700 leading-8 text-center max-w-4xl mx-auto mb-8">Today, India is witnessing a significant increase in:</p>
       <div className="grid md:grid-cols-2 gap-6">
 
         {[
@@ -150,7 +150,7 @@ export default function About() {
 
       </div>
     </div>
-
+<p className="text-lg text-gray-700 leading-8 max-w-5xl mx-auto mb-20 text-center">Many of these citizens are financially independent, yet emotionally vulnerable. They seek a safe and caring community rather than living in isolation.</p>
     {/* Our Solution */}
 
     <div className="bg-green-700 rounded-2xl text-white p-12 mb-20">
@@ -165,10 +165,9 @@ export default function About() {
       </p>
 
       <p className="mt-6 text-green-100 leading-8">
-        Every resident becomes part of an extended family where people care,
-        encourage and support one another while maintaining independent living.
+        This means every resident is not merely a neighbour but part of an extended family where people care for, encourage and support one another.
       </p>
-
+      <p className="mt-6 text-green-100 leading-8 text-lg">The project aims to provide an environment where senior citizens can continue to live independently while enjoying the comfort of a caring community.</p>
     </div>
 
     {/* Major Features */}
@@ -186,15 +185,15 @@ export default function About() {
           "Safe & Secure Environment",
           "Mutual Care & Social Support",
           "Yoga & Meditation",
-          "Wellness Activities",
-          "Community Kitchen",
+          "Wellness and Preventive Health Activities",
+          "Community Kitchen and Shared Dining",
           "Organic Farming",
           "Walking Tracks",
           "Green Spaces",
-          "Cultural Activities",
-          "Rural Tourism",
+          "Cultural and Recreational Activities",
+          "Rural Tourism and Homestay Experience",
           "Eco-friendly Development",
-          "Solar Energy"
+          "Solar Energy and Sustainable Living"
         ].map((feature, index) => (
           <div
             key={index}
@@ -209,22 +208,52 @@ export default function About() {
       </div>
 
     </div>
+<div className="bg-green-50 rounded-2xl p-10 mb-20">
+  <h2 className="text-3xl font-bold text-green-700 mb-6 text-center">
+    Why This Model is Important
+  </h2>
 
+  <p className="text-lg text-gray-700 leading-8 mb-8 text-center">
+    Surya Nikunjam addresses several national priorities simultaneously:
+  </p>
+
+  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {[
+      "Healthy Ageing",
+      "Mental Well-being",
+      "Social Inclusion",
+      "Community Participation",
+      "Rural Development",
+      "Employment Generation",
+      "Sustainable Tourism",
+      "Women's Safety and Social Security",
+      "Environmental Sustainability",
+    ].map((item, index) => (
+      <div
+        key={index}
+        className="bg-white rounded-lg shadow p-4 border-l-4 border-green-600"
+      >
+        {item}
+      </div>
+    ))}
+  </div>
+</div>
     {/* Benefits */}
 
     <div className="grid lg:grid-cols-3 gap-8 mb-20">
 
       <div className="bg-gray-50 rounded-xl p-8 shadow">
         <h3 className="text-2xl font-bold text-green-700 mb-5">
-          Elderly Women
+          Elderly Women Living Alone
         </h3>
 
         <ul className="space-y-3 list-disc list-inside text-gray-700">
-          <li>Safe and secure living</li>
-          <li>Caring community</li>
-          <li>Daily companionship</li>
-          <li>Wellness activities</li>
-          <li>Support during emergencies</li>
+          <li>A safe and secure living environment.</li>
+          <li>A caring community instead of loneliness.</li>
+          <li>Daily social interaction and companionship.</li>
+          <li>Access to wellness activities.</li>
+          <li>Emotional support during illness and emergencies.</li>
+          <li>Opportunities to participate in cultural and community programmes.</li>
         </ul>
       </div>
 
@@ -234,11 +263,11 @@ export default function About() {
         </h3>
 
         <ul className="space-y-3 list-disc list-inside text-gray-700">
-          <li>Trusted community network</li>
-          <li>Emotional security</li>
-          <li>Independent living</li>
-          <li>Peace of mind</li>
-          <li>Sense of belonging</li>
+          <li>A trusted community network.</li>
+          <li>Emotional security and companionship.</li>
+          <li>A sense of belonging.</li>
+          <li>Independent living with community support.</li>
+          <li>Dignity and peace of mind in later life.</li>
         </ul>
       </div>
 
@@ -248,16 +277,37 @@ export default function About() {
         </h3>
 
         <ul className="space-y-3 list-disc list-inside text-gray-700">
-          <li>Reduce loneliness</li>
-          <li>Strengthen community values</li>
-          <li>Create rural employment</li>
-          <li>Support local businesses</li>
-          <li>Promote sustainable living</li>
+          <li>Reducing loneliness among senior citizens.</li>
+          <li>Strengthening community values.</li>
+          <li>Creating rural employment.</li>
+          <li>Promoting responsible tourism.</li>
+          <li>Supporting local farmers and small businesses.</li>
+          <li>Encouraging healthy lifestyles.</li>
+          <li>Building a compassionate society.</li>
         </ul>
       </div>
 
     </div>
+<div className="bg-white border border-green-200 rounded-2xl p-10 mb-20 shadow-sm">
+  <h2 className="text-3xl font-bold text-green-700 mb-6 text-center">
+    Our Request
+  </h2>
 
+  <div className="space-y-5 text-lg text-gray-700 leading-8">
+    <p>
+      We respectfully seek the guidance and support of the Government of India,
+      the Government of Kerala, public representatives, CSR partners and
+      philanthropic organisations to develop Surya Nikunjam as a model
+      Community-Based Senior Living initiative.
+    </p>
+
+    <p>
+      We also seek guidance regarding eligible Government programmes,
+      institutional support and partnerships that can help strengthen this
+      social initiative.
+    </p>
+  </div>
+</div>
     {/* Conclusion */}
 
     <div className="bg-green-50 rounded-2xl p-12 text-center">
@@ -268,10 +318,9 @@ export default function About() {
 
       <p className="text-lg text-gray-700 leading-8 max-w-4xl mx-auto">
         Surya Nikunjam is not simply about constructing homes. It is about
-        rebuilding human relationships and ensuring every senior citizen can
-        experience ageing with dignity, friendship, safety and happiness.
+        rebuilding human relationships, ensuring that no elderly woman feels abandoned, giving hope to parents who have no children to care for them and creating a society where ageing is experienced with dignity, friendship, safety and happiness.
       </p>
-
+        <p className="text-lg text-gray-700 leading-8 max-w-4xl mx-auto pt-5">If successful, Surya Nikunjam can become a model for similar community-based senior living initiatives across India.</p>
       <div className="mt-10">
         <h3 className="text-2xl font-bold">
           Founder
@@ -282,8 +331,14 @@ export default function About() {
         </p>
 
         <p className="mt-4 text-gray-700">
-          📍 West Kodikulam, Thodupuzha, Idukki, Kerala
-        </p>
+  <strong>Surya Nikunjam Residential Association</strong>
+</p>
+
+<p className="mt-2 text-gray-700">
+  📍 West Kodikulam,<br />
+  Near Thodupuzha,<br />
+  Idukki, Kerala, India
+</p>
 
         <p className="text-gray-700">
           📞 +91 9207979677 / +91 9447479677
