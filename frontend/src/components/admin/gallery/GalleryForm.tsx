@@ -34,7 +34,7 @@ export default function GalleryForm({
     order: 1,
     isActive: true,
   });
-const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB
+const MAX_FILE_SIZE = 80 * 1024 * 1024; // 80 MB
   useEffect(() => {
     if (!initialData) return;
 
@@ -190,7 +190,7 @@ const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB
   if (selected.size > MAX_FILE_SIZE) {
   Swal.fire({
     icon: "warning",
-    title: "Maximum upload size is 500 MB.",
+    title: "Maximum upload size is 80 MB.",
   });
 
   setFile(null);
