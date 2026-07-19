@@ -190,7 +190,7 @@ const MAX_FILE_SIZE = 80 * 1024 * 1024; // 80 MB
   if (selected.size > MAX_FILE_SIZE) {
   Swal.fire({
     icon: "warning",
-    title: "Maximum upload size is 80 MB.",
+    title: "Please compress the video before uploading. Maximum allowed size is 80 MB.",
   });
 
   setFile(null);
@@ -397,7 +397,7 @@ if (loading) return;
 />
 
 <p className="text-sm text-gray-500 mt-2">
-  Maximum upload size: 500 MB
+  Maximum upload size: 80 MB
 </p>
 
 {file && (
