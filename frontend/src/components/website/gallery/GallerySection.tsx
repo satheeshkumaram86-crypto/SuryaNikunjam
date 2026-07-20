@@ -11,11 +11,13 @@ import type { Gallery } from "../../../types/gallery";
 interface GallerySectionProps {
   limit?: number;
   showViewAll?: boolean;
+  showFeaturedVideo?: boolean;
 }
 
 export default function GallerySection({
   limit,
   showViewAll = false,
+  showFeaturedVideo = false,
 }: GallerySectionProps) {
   const [galleries, setGalleries] = useState<Gallery[]>([]);
   const [selectedGallery, setSelectedGallery] =
@@ -62,6 +64,18 @@ export default function GallerySection({
     loadGallery();
   }, [loadGallery]);
 
+  const featuredVideo = galleries.find(
+  (item) =>
+    item.mediaType === "video" &&
+    item.isActive
+);
+
+const galleryItems = showFeaturedVideo
+  ? galleries.filter(
+      (item) => item._id !== featuredVideo?._id
+    )
+  : galleries;
+
   if (loading) {
     return (
       <section className="py-20">
@@ -96,7 +110,32 @@ export default function GallerySection({
               videos showcasing Surya Nikunjam Community.
             </p>
           </div>
+ {showFeaturedVideo && featuredVideo && (
+  <section className="mb-16">
+    <div className="relative overflow-hidden rounded-3xl shadow-2xl border border-gray-100 bg-white">
 
+      {/* Badge */}
+
+      <div className="absolute top-4 left-4 z-10 bg-green-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+        Surya Nikunjam
+      </div>
+
+      <video
+        controls
+        preload="metadata"
+        className="w-full aspect-video object-cover"
+      >
+        <source
+          src={featuredVideo.video}
+          type="video/mp4"
+        />
+
+        Your browser does not support the video tag.
+      </video>
+
+    </div>
+  </section>
+)}
           {/* Empty State */}
 
           {galleries.length === 0 ? (
@@ -111,7 +150,7 @@ export default function GallerySection({
             </div>
           ) : (
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {galleries.map((gallery) => (
+              {galleryItems.map((gallery) => (
                 <GalleryCard
                   key={gallery._id || gallery.title}
                   gallery={gallery}
