@@ -34,7 +34,8 @@ export default function GalleryForm({
     order: 1,
     isActive: true,
   });
-const MAX_FILE_SIZE = 80 * 1024 * 1024; // 80 MB
+const MAX_FILE_SIZE_IMAGE = 8 * 1024 * 1024; // 8 MB
+const MAX_FILE_SIZE_VIDEO = 80 * 1024 * 1024; // 80 MB
   useEffect(() => {
     if (!initialData) return;
 
@@ -159,46 +160,53 @@ const MAX_FILE_SIZE = 80 * 1024 * 1024; // 80 MB
 
   const selected = e.target.files[0];
 
-  // Validate file type
-  if (
-    form.mediaType === "image" &&
-    !selected.type.startsWith("image/")
-  ) {
-    Swal.fire({
-      icon: "warning",
-      title: "Please select an image file.",
-    });
+  // IMAGE
+  if (form.mediaType === "image") {
 
-    e.target.value = "";
-    return;
+    if (!selected.type.startsWith("image/")) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please select an image.",
+      });
+      e.target.value = "";
+      return;
+    }
+
+    if (selected.size > MAX_FILE_SIZE_IMAGE) {
+      Swal.fire({
+        icon: "warning",
+        title: "Maximum image size is 8 MB.",
+      });
+
+      e.target.value = "";
+      return;
+    }
   }
 
-  if (
-    form.mediaType === "video" &&
-    !selected.type.startsWith("video/")
-  ) {
-    Swal.fire({
-      icon: "warning",
-      title: "Please select a video file.",
-    });
+  // VIDEO
+  if (form.mediaType === "video") {
 
-    e.target.value = "";
-    return;
+    if (!selected.type.startsWith("video/")) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please select a video.",
+      });
+
+      e.target.value = "";
+      return;
+    }
+
+    if (selected.size > MAX_FILE_SIZE_VIDEO) {
+      Swal.fire({
+        icon: "warning",
+        title: "Maximum video size is 80 MB.",
+      });
+
+      e.target.value = "";
+      return;
+    }
   }
 
-  // Validate size
-  if (selected.size > MAX_FILE_SIZE) {
-  Swal.fire({
-    icon: "warning",
-    title: "Please compress the video before uploading. Maximum allowed size is 80 MB.",
-  });
-
-  setFile(null);
-  e.target.value = "";
-  return;
-}
-
-  // Remove previous preview
   if (preview.startsWith("blob:")) {
     URL.revokeObjectURL(preview);
   }
@@ -206,6 +214,7 @@ const MAX_FILE_SIZE = 80 * 1024 * 1024; // 80 MB
   setFile(selected);
   setPreview(URL.createObjectURL(selected));
 };
+
   const submitHandler = async (
   e: React.FormEvent
 ) => {
@@ -396,9 +405,16 @@ if (loading) return;
   className="w-full"
 />
 
-<p className="text-sm text-gray-500 mt-2">
-  Maximum upload size: 80 MB
-</p>
+{form.mediaType === "image" ? (
+  <p className="text-sm text-gray-500 mt-2">
+    Maximum upload size: 8 MB
+  </p>
+) : (
+  <p className="text-sm text-gray-500 mt-2">
+    Maximum upload size: 80 MB
+  </p>
+)}
+
 
 {file && (
   <p className="text-sm text-green-600 mt-2">
