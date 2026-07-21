@@ -18,6 +18,7 @@ import MissionVisionSection from "../../components/website/about/MissionVisionSe
 
 import { getAbout } from "../../services/websiteAboutService";
 import CTASection from "../../components/website/home/CTASection";
+import BrochureSection from "../../components/website/brochure/BrochureSection";
 
 export default function Home() {
   const [about, setAbout] = useState<any>(null);
@@ -43,7 +44,7 @@ export default function Home() {
       <HeroSlider />
        {/* WELCOME SECTION */}
       <WelcomeSection data={about} />
-
+      <BrochureSection />
        {/* WHY CHOOSE */}
       <WhyChooseSection limit={3} />
 
